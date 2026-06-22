@@ -27,7 +27,16 @@
       "Bash(git restore *)",
       "Bash(git reset *)",
       "Bash(git rm *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git config *)",
+      "Bash(git filter-branch *)",
+      "Bash(git stash *)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --msg-filter 'grep -v \"^Co-Authored-By:\"' -- --all)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(c['name'], ':', c.get\\('data', ''\\)\\) for c in d.get\\('collectors', []\\) if 'error' in c.get\\('name',''\\).lower\\(\\) or 'exception' in c.get\\('name',''\\).lower\\(\\)]\")",
+      "Bash(php /home/muhammad-farhan/Sites/dbis/public/index.php)",
+      "Bash(composer dump-autoload *)",
+      "Bash(composer install *)",
+      "Bash(python3 *)"
     ]
   }
 }
