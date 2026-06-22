@@ -166,6 +166,11 @@ React/*.sw?
 .env.backup
 
 #-------------------------
+# Claude Code
+#-------------------------
+.claude/settings.local.json
+
+#-------------------------
 # Deployment Local Files
 #-------------------------
 deployment/deploy.servers.local.json
