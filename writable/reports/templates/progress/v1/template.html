@@ -1,0 +1,714 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Progress Report</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 24px 40px 56px 40px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      color: #1f2937;
+      font-family: DejaVu Sans, Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .progress-paper {
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      background: #fff;
+    }
+
+    .pr-header-table,
+    .pr-meta-table,
+    .pr-grid {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .pr-header-table td {
+      vertical-align: top;
+      padding: 0;
+    }
+
+    .line-title {
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.25;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .line-sub {
+      font-size: 11px;
+      line-height: 1.25;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .line-title:empty,
+    .line-sub:empty,
+    .header-item:empty,
+    .small:empty,
+    .pr-meta-value:empty {
+      display: none;
+    }
+
+    .pr-header-center {
+      text-align: center;
+    }
+
+    .pr-header-center .small {
+      white-space: nowrap;
+    }
+
+    .pr-logo {
+      width: 74px;
+      height: auto;
+      margin: 0 auto 4px auto;
+      display: block;
+    }
+
+    .pr-header-right {
+      text-align: right;
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .pr-title {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      margin: 10px 0 12px 0;
+    }
+
+    .pr-meta-table td {
+      border: 1px solid #dfe3ea;
+      padding: 7px 9px;
+      vertical-align: top;
+    }
+
+    .pr-meta-label {
+      display: block;
+      font-size: 11px;
+      color: #4b5563;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .pr-meta-value {
+      font-size: 12px;
+      color: #111827;
+      min-height: 16px;
+    }
+
+    .pr-section {
+      margin-top: 14px;
+    }
+
+    .pr-page-break-before {
+      page-break-before: always;
+    }
+
+    .pr-section-page {
+      border: 1px solid #dfe3ea;
+      padding: 10px;
+    }
+
+    .pr-section-header {
+      border-bottom: 1px solid #dfe3ea;
+      margin-bottom: 8px;
+      padding-bottom: 5px;
+    }
+
+    .pr-section-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .pr-grid {
+      border: 1px solid #dfe3ea;
+    }
+
+    .pr-grid tr {
+      page-break-inside: avoid;
+    }
+
+    .pr-grid th,
+    .pr-grid td {
+      border: 1px solid #dfe3ea;
+      padding: 7px 9px;
+      font-size: 12px;
+      vertical-align: top;
+      word-break: break-word;
+    }
+
+    .pr-grid th {
+      background: #f8f9fb;
+      text-align: left;
+      font-weight: 700;
+    }
+
+    .pr-pm-grid {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    .pr-pm-grid col.pm-col-1 {
+      width: 75%;
+    }
+
+    .pr-pm-grid col.pm-col-2 {
+      width: 25%;
+    }
+
+    .pr-pm-grid th:first-child,
+    .pr-pm-grid td:first-child {
+      width: 75%;
+    }
+
+    .pr-pm-grid th:last-child,
+    .pr-pm-grid td:last-child {
+      width: 25%;
+    }
+
+    .pm-current-programmes {
+      margin-top: 6px;
+    }
+
+    .pm-programme-item {
+      line-height: 1.45;
+      color: #212529;
+    }
+
+    .pm-domain-label {
+      color: #4b5563;
+      font-weight: 700;
+    }
+
+    .pm-domain-separator {
+      font-weight: 700;
+      color: #4b5563;
+    }
+
+    .pr-field-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #4b5563;
+      margin: 7px 0 3px 0;
+    }
+
+    .pr-comment-block {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .pr-auto-text-box {
+      border: 1px dashed #b8bfca;
+      border-radius: 6px;
+      padding: 8px 10px;
+      min-height: 30px;
+      background: #fcfcfd;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .pr-date-emphasis {
+      font-weight: 700;
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    .pr-progress-legend {
+      text-align: center;
+      font-size: 12px;
+      margin-bottom: 8px;
+      color: #1f2937;
+    }
+
+    .pr-progress-legend img {
+      width: 30px;
+      height: auto;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    .pr-chart-wrap {
+      border: 1px solid #dfe3ea;
+      border-radius: 0;
+      padding: 8px;
+      background: #ffffff;
+      min-height: 200px;
+      page-break-inside: avoid;
+    }
+
+    .pr-chart-wrap .pr-pdf-graph-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: fill;
+    }
+
+    #section_progress_pdf .pr-chart-wrap {
+      border: 1px solid #dfe3ea;
+      border-radius: 0;
+      background: #ffffff;
+      min-height: 330px;
+    }
+
+    #section_progress_pdf .pr-chart-wrap .pr-pdf-graph-placeholder {
+      min-height: 314px;
+    }
+
+    #section_progress_pdf .pr-chart-wrap .pr-pdf-graph-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: fill;
+    }
+
+    .pr-pdf-graph-placeholder {
+      min-height: 182px;
+      border: 0;
+      border-radius: 0;
+      background:
+        linear-gradient(to right, rgba(182, 194, 214, 0.22) 1px, transparent 1px) 0 0/24px 24px,
+        linear-gradient(to bottom, rgba(182, 194, 214, 0.22) 1px, transparent 1px) 0 0/24px 24px,
+        #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 12px;
+    }
+
+    .pr-pdf-graph-icon {
+      width: 74px;
+      height: 34px;
+      border-bottom: 2px solid #6b7280;
+      border-left: 2px solid #6b7280;
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .pr-pdf-graph-icon::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 16px;
+      width: 54px;
+      height: 0;
+      border-top: 2px solid #2563eb;
+      transform: rotate(-18deg);
+      transform-origin: left center;
+    }
+
+    .pr-pdf-graph-title {
+      font-size: 11px;
+      color: #4b5563;
+      font-weight: 600;
+    }
+
+    .pr-figure-caption {
+      margin-top: 5px;
+      margin-bottom: 10px;
+      font-size: 11px;
+      color: #4b5563;
+    }
+
+    .pr-graph-placeholder {
+      text-align: center;
+      color: #6b7280;
+      font-size: 12px;
+      padding: 20px 10px;
+      border: 1px dashed #b8bfca;
+      border-radius: 6px;
+      background: #fcfcfd;
+    }
+
+    .pr-domain-block {
+      border: 1px solid #d9dfe9;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+
+    .pr-domain-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 10px;
+    }
+
+    .pr-domain-layout {
+      width: 100%;
+    }
+
+    .pr-domain-layout table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .pr-domain-layout td {
+      vertical-align: top;
+      width: 50%;
+      padding: 0;
+    }
+
+    .pr-domain-layout td:first-child {
+      padding-right: 8px;
+    }
+
+    .pr-domain-layout td:last-child {
+      padding-left: 8px;
+    }
+
+    .pr-domain-comment-row {
+      margin-top: 8px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .pr-domain-goals-table {
+      margin-bottom: 0;
+    }
+
+    .pr-domain-goals-table th,
+    .pr-domain-goals-table td {
+      padding: 7px 9px;
+    }
+
+    .pr-instructional-images {
+      margin-top: 10px;
+    }
+
+    .pr-instructional-image-item {
+      width: 100%;
+      margin-bottom: 10px;
+      page-break-inside: avoid;
+    }
+
+    .pr-instructional-image-item img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid #dfe3ea;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+
+    .pr-two-col-grid {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 4px;
+    }
+
+    .pr-one-col-grid {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 4px;
+    }
+
+    .pr-graph-card {
+      border: 1px solid #d9dfe9;
+      border-radius: 6px;
+      padding: 6px;
+      background: #fff;
+      page-break-inside: avoid;
+    }
+
+    .pr-graph-card-message {
+      min-height: 198px;
+    }
+
+    .pr-graph-title {
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+
+    .pr-empty-info {
+      border: 1px solid #d9dfe9;
+      border-radius: 6px;
+      padding: 14px 12px;
+      background: #fbfcfe;
+      color: #4b5563;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    #section_manding_pdf .pr-one-col-grid {
+      border-spacing: 0 2px;
+    }
+
+    #section_manding_pdf .pr-section-header,
+    #section_problem_behaviour_pdf .pr-section-header {
+      border-bottom: 1px solid #dfe3ea;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+    }
+
+    #section_manding_pdf .pr-graph-card {
+      border: 1px solid #d9dfe9;
+      border-radius: 6px;
+      background: #fff;
+      padding: 4px;
+    }
+
+    #section_manding_pdf .pr-graph-title {
+      font-size: 10px;
+      margin-bottom: 3px;
+      line-height: 1.2;
+      border-bottom: 1px solid #dfe3ea;
+      padding-bottom: 3px;
+    }
+
+    #section_manding_pdf .pr-dataset-legend {
+      margin: 3px 0 4px;
+      line-height: 1.2;
+    }
+
+    #section_manding_pdf .pr-dataset-legend-item {
+      display: inline-block;
+      margin-right: 10px;
+      margin-bottom: 2px;
+      color: #374151;
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    #section_manding_pdf .pr-dataset-legend-swatch {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    #section_manding_pdf .pr-dataset-legend-label {
+      vertical-align: middle;
+    }
+
+    #section_problem_behaviour_pdf .pr-graph-title {
+      border-bottom: 1px solid #dfe3ea;
+      padding-bottom: 3px;
+    }
+
+    #section_manding_pdf .pr-chart-wrap {
+      height: 220px;
+      min-height: 220px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #section_manding_pdf .pr-chart-wrap .pr-pdf-graph-image {
+      height: auto;
+      width: 100%;
+      max-height: 100%;
+      margin: 0;
+      object-fit: contain;
+    }
+
+    #section_problem_behaviour_pdf .pr-graph-card {
+      border: 1px solid #d9dfe9;
+      border-radius: 6px;
+      background: #fff;
+      padding: 4px;
+    }
+
+    #section_problem_behaviour_pdf .pr-chart-wrap {
+      height: 220px;
+      min-height: 220px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #section_problem_behaviour_pdf .pr-chart-wrap .pr-pdf-graph-image {
+      height: auto;
+      width: 100%;
+      max-height: 100%;
+      margin: 0;
+      object-fit: contain;
+    }
+
+    #section_conclusion_pdf {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-paper">
+    <table class="pr-header-table">
+      <tr>
+        <td style="width: 38%;">
+          <div class="line-title">{{report_header_line_1}}</div>
+          <div class="line-sub">{{report_header_line_2}}</div>
+          <div class="line-title" style="margin-top: 6px;">{{report_header_line_3}}</div>
+          <div class="line-sub">{{report_header_line_4}}</div>
+        </td>
+        <td class="pr-header-center" style="width: 24%;">
+          <img class="pr-logo" src="{{report_logo_data_uri}}" alt="Report Logo">
+          <div class="small">{{report_header_center_caption}}</div>
+        </td>
+        <td class="pr-header-right" style="width: 38%;">
+          <div class="header-item">{{report_phone}}</div>
+          <div class="header-item">{{report_website}}</div>
+          <div class="header-item">{{report_location_line}}</div>
+        </td>
+      </tr>
+    </table>
+
+    <div class="pr-title">PROGRESS REPORT</div>
+
+    <table class="pr-meta-table">
+      <tr>
+        <td style="width: 50%;" colspan="2">
+          <span class="pr-meta-label">Learner</span>
+          <div class="pr-meta-value">{{learner_name}}</div>
+        </td>
+        <td style="width: 25%;">
+          <span class="pr-meta-label">Date of Birth</span>
+          <div class="pr-meta-value">{{date_of_birth}}</div>
+        </td>
+        <td style="width: 25%;">
+          <span class="pr-meta-label">Age At End Of Period</span>
+          <div class="pr-meta-value">{{age_at_end_of_period}}</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="width: 25%;">
+          <span class="pr-meta-label">Date Of Report</span>
+          <div class="pr-meta-value">{{date_of_report}}</div>
+        </td>
+        <td style="width: 25%;">
+          <span class="pr-meta-label">Progress Period</span>
+          <div class="pr-meta-value">{{period_label}}</div>
+        </td>
+        <td style="width: 25%;">
+          <span class="pr-meta-label">Reported By</span>
+          <div class="pr-meta-value">{{reported_by_name}}</div>
+        </td>
+        <td style="width: 25%;">
+          <span class="pr-meta-label">Approved By</span>
+          <div class="pr-meta-value">{{approved_by}}</div>
+        </td>
+      </tr>
+    </table>
+
+    <div class="pr-section" id="section_current_programme_management_pdf">
+      <div class="pr-section-header">
+        <h3 class="pr-section-title">Current Program Management</h3>
+      </div>
+      <table class="pr-grid pr-pm-grid">
+        <colgroup>
+          <col class="pm-col-1">
+          <col class="pm-col-2">
+        </colgroup>
+        <tbody>
+          <tr>
+            <th>No. of Sessions In Selected Period</th>
+            <td>{{pm_sessions_count}}</td>
+          </tr>
+          <tr>
+            <th>Hours of instruction between {{period_start_display}} to {{period_end_display}}</th>
+            <td>{{pm_hours_of_instruction}}</td>
+          </tr>
+          <tr>
+            <th>DTI / NET Ratio</th>
+            <td>{{pm_dti_net_ratio}}</td>
+          </tr>
+          <tr>
+            <th>Schedule Of Reinforcement</th>
+            <td>{{pm_schedule_of_reinforcement}}</td>
+          </tr>
+          <tr>
+            <td colspan="2"><strong>Current Programs:</strong>{{pm_current_programmes_html}}</td>
+          </tr>
+        </tbody>
+      </table>
+      {{programme_management_comment_block_html}}
+    </div>
+
+    <div class="pr-section pr-page-break-before" id="section_progress_pdf">
+      <div class="pr-section-header">
+        <h3 class="pr-section-title">Progress</h3>
+      </div>
+      <div class="pr-section-page">
+        <p>{{progress_intro_html}}</p>
+        <div class="pr-progress-legend">
+          <span style="margin-right: 16px;">
+            <img src="{{progress_legend_black_uri}}" alt="Skills Retained">
+            Skills Retained
+          </span>
+          <span>
+            <img src="{{progress_legend_blue_uri}}" alt="Degrees of Independence">
+            Degrees of independence
+          </span>
+        </div>
+        <div class="pr-chart-wrap">{{progress_cumulative_all_time_graph_html}}</div>
+        <div class="pr-figure-caption">Figure 1: Graph shows cumulative progress across all skills.</div>
+        <div class="pr-chart-wrap">{{progress_cumulative_period_graph_html}}</div>
+        <div class="pr-figure-caption">Figure 2: Graph shows the cumulative progress across all skills between the dates {{period_start_display}} to {{period_end_display}}</div>
+      </div>
+    </div>
+
+    <div class="pr-section pr-page-break-before" id="section_instructional_programmes_pdf">
+      <div class="pr-section-header">
+        <h3 class="pr-section-title">Instructional Programs</h3>
+      </div>
+      <div>
+        <div style="margin-top: 8px;">{{instructional_domain_blocks_html}}</div>
+        {{instructional_images_html}}
+      </div>
+    </div>
+
+    {{manding_section_html}}
+
+    <div class="pr-section pr-page-break-before" id="section_problem_behaviour_pdf">
+      <div class="pr-section-header">
+        <h3 class="pr-section-title">Problem Behaviour Reduction</h3>
+      </div>
+      <div>{{problem_behaviour_graphs_html}}</div>
+      {{problem_behaviour_comment_block_html}}
+    </div>
+
+    <div class="pr-section" id="section_conclusion_pdf">
+      <div class="pr-section-header">
+        <h3 class="pr-section-title">Conclusion</h3>
+      </div>
+      <div class="pr-auto-text-box">{{conclusion_comment}}</div>
+    </div>
+  </div>
+</body>
+</html>
+

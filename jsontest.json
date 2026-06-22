@@ -1,0 +1,276 @@
+[
+  {
+    "inputs": {
+      "type": "prompt_level",
+      "input_type": "radio",
+      "choices": [
+        {
+          "value": "FFP",
+          "label": "Full Physical Prompt"
+        },
+        {
+          "value": "PP",
+          "label": "Partial Physical Prompt"
+        },
+        {
+          "value": "GP",
+          "label": "Gesture Prompt"
+        },
+        {
+          "value": "V",
+          "label": "Verbal Prompt"
+        },
+        {
+          "value": "Item",
+          "label": "Item"
+        },
+        {
+          "value": "Ind",
+          "label": "Independent"
+        }
+      ],
+      "key": "Ind",
+      "description": "Probes for different levels of prompting."
+    },
+    "result": "FFP",
+    "probe_set_id": 11,
+    "combination": "Basline to Retained ",
+    "phase": {
+      "id": 1,
+      "name": "Baseline"
+    },
+    "rule": {
+      "is_frame_set_required": null,
+      "frame_set_no": null,
+      "default_rule": "{\"consecutive_criteria\":3,\"same_day_check\":true,\"p_phase_id\":4,\"f_phase_id\":2,\"program_change\":false,\"session_limit\":null,\"activation_days\":null,\"rule_start\":true,\"rule_end\":false}"
+    }
+  },
+  {
+    "inputs": {
+      "type": "yes_no",
+      "input_type": "radio",
+      "choices": [
+        {
+          "value": "Y",
+          "label": "Yes"
+        },
+        {
+          "value": "N",
+          "label": "No"
+        }
+      ],
+      "key": "Y",
+      "description": "Probes that collect Yes or No responses."
+    },
+    "result": "Y",
+    "probe_set_id": 1,
+    "combination": "Basline to Retained ",
+    "phase": {
+      "id": 1,
+      "name": "Baseline"
+    },
+    "rule": {
+      "is_frame_set_required": null,
+      "frame_set_no": null,
+      "default_rule": "{\"consecutive_criteria\":3,\"same_day_check\":true,\"p_phase_id\":4,\"f_phase_id\":2,\"frame_check\":false,\"program_change\":false,\"session_limit\":null,\"activation_days\":null,\"rule_start\":true,\"rule_end\":false}"
+    }
+  },
+  {
+    "inputs": {
+      "type": "traffic_light",
+      "input_type": "radio",
+      "choices": [
+        {
+          "value": "R",
+          "label": "Red"
+        },
+        {
+          "value": "Y",
+          "label": "Yellow"
+        },
+        {
+          "value": "G",
+          "label": "Green"
+        }
+      ],
+      "key": "G",
+      "description": "Probes that use traffic light colors to indicate status."
+    },
+    "result": "R",
+    "probe_set_id": 14,
+    "combination": {
+      "id": "1",
+      "name": "Basline to Retained "
+    },
+    "phase": {
+      "id": 1,
+      "name": "Baseline"
+    },
+    "rule": {
+      "default_rule": "{\"consecutive_criteria\":3,\"same_day_check\":true,\"p_phase_id\":4,\"f_phase_id\":2,\"program_change\":false,\"session_limit\":null,\"activation_days\":null,\"rule_start\":true,\"rule_end\":false}",
+      "is_frame_set_required": null,
+      "frame_set_no": null
+    }
+  },
+  {
+    "id": "1",
+    "session_id": "1",
+    "session_date": "2024-08-19",
+    "client_id": "32",
+    "domain_id": "1",
+    "goal_id": "1",
+    "target_id": "1",
+    "client_probe_set_id": "1",
+    "current_phase_id": "1",
+    "collected_data": "{\"inputs\":{\"type\":\"yes_no\",\"input_type\":\"radio\",\"choices\":[{\"value\":\"Y\",\"label\":\"Yes\"},{\"value\":\"N\",\"label\":\"No\"}],\"key\":\"Y\",\"description\":\"Probes that collect Yes or No responses.\"},\"result\":\"Y\",\"probe_set_id\":1,\"combination\":{\"id\":\"1\",\"name\":\"Basline to Retained \"},\"phase\":{\"id\":1,\"name\":\"Baseline\"},\"rule\":{\"default_rule\":\"{\\\"consecutive_criteria\\\":3,\\\"same_day_check\\\":true,\\\"p_phase_id\\\":4,\\\"f_phase_id\\\":2,\\\"frame_check\\\":false,\\\"program_change\\\":false,\\\"session_limit\\\":null,\\\"activation_days\\\":null,\\\"rule_start\\\":true,\\\"rule_end\\\":false}\",\"is_frame_set_required\":null,\"frame_set_no\":null}}",
+    "is_processed": "0",
+    "processed_at": null,
+    "is_conflicted": "0",
+    "created_at": {
+      "date": "2024-08-19 09:24:22.000000",
+      "timezone_type": 3,
+      "timezone": "Europe/London"
+    },
+    "created_by": "1001",
+    "updated_at": null,
+    "updated_by": null,
+    "deleted_at": null,
+    "deleted_by": null
+  },
+  {
+    "type": "yes_no",
+    "input_type": "radio",
+    "choices": [
+      {
+        "value": "Y",
+        "label": "Yes"
+      },
+      {
+        "value": "N",
+        "label": "No"
+      }
+    ],
+    "key": "Y",
+    "description": "Probes that collect Yes or No responses."
+  },
+  {
+    "consecutive_criteria": 3,
+    "same_day_check": true,
+    "p_phase_id": 4,
+    "f_phase_id": 2,
+    "frame_check": false,
+    "program_change": false,
+    "session_limit": null,
+    "activation_days": null,
+    "rule_start": true,
+    "rule_end": false
+  },
+  {
+    "type": "percentage_yes_no",
+    "input_type": "radio_with_text",
+    "choices": [
+      {
+        "value": "Y",
+        "label": "Yes"
+      },
+      {
+        "value": "N",
+        "label": "No"
+      }
+    ],
+    "transition_input": {
+      "key": "transition_input",
+      "input_type": "text",
+      "placeholder": "Enter transition",
+      "required": true
+    },
+    "key": "Y",
+    "description": "Probes that collect Yes or No responses for percentage probes"
+  },
+  {
+    "inputs": {
+      "type": "percentage_yes_no",
+      "input_type": "radio",
+      "choices": [
+        {
+          "value": "Y",
+          "label": "Yes"
+        },
+        {
+          "value": "N",
+          "label": "No"
+        }
+      ],
+      "key": "Y",
+      "description": "Probes that collect Yes or No responses."
+    },
+    "result": [
+      "N",
+      "N",
+      "N"
+    ],
+    "probe_set_id": "44",
+    "combination": {
+      "id": "1",
+      "name": "Baseline to Retained "
+    },
+    "phase": {
+      "id": "1",
+      "name": "Baseline"
+    },
+    "rule": {
+      "default_rule": "{\"consecutive_criteria\":3,\"same_day_check\":true,\"p_phase_id\":4,\"f_phase_id\":2,\"frame_check\":false,\"program_change\":false,\"session_limit\":null,\"activation_days\":null,\"rule_start\":true,\"rule_end\":false}",
+      "frame_set_no": null
+    }
+  },
+  {
+    "inputs": {
+      "type": "prompt_level",
+      "input_type": "radio",
+      "choices": [
+        {
+          "value": "FFP",
+          "label": "Full Physical Prompt"
+        },
+        {
+          "value": "PP",
+          "label": "Partial Physical Prompt"
+        },
+        {
+          "value": "GP",
+          "label": "Gesture Prompt"
+        },
+        {
+          "value": "V",
+          "label": "Verbal Prompt"
+        },
+        {
+          "value": "Item",
+          "label": "Item"
+        },
+        {
+          "value": "Ind",
+          "label": "Independent"
+        }
+      ],
+      "key": "Ind",
+      "description": "Probes for different levels of prompting."
+    },
+    "result": [
+      "Ind"
+    ],
+    "probe_set_id": "64",
+    "combination": {
+      "id": "3",
+      "name": "Acquisition and Retained Only"
+    },
+    "phase": {
+      "id": "2",
+      "name": "Acquisition"
+    },
+    "rule": {
+      "default_rule": "{\"consecutive_criteria\":\"-3\",\"same_day_check\":false,\"p_phase_id\":4,\"f_phase_id\":2,\"program_change\":true,\"session_limit\":\"20\",\"activation_days\":null,\"rule_start\":false,\"rule_end\":false}",
+      "frame_set_no": null
+    }
+  }
+]

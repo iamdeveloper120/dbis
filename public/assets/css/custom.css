@@ -1,0 +1,201 @@
+/* Ensure fixed columns have background color in both light and dark modes */
+
+/* For normal mode (light theme) */
+
+table.fixed-columns-table.dataTable thead tr>.dtfc-fixed-start,
+table.fixed-columns-table.dataTable thead tr>.dtfc-fixed-end,
+table.fixed-columns-table.dataTable tfoot tr>.dtfc-fixed-start,
+table.fixed-columns-table.dataTable tfoot tr>.dtfc-fixed-end {
+    top: 0;
+    bottom: 0;
+    z-index: 3;
+    background-color: white;
+    /* Ensure stacking */
+}
+
+table.fixed-columns-table.dataTable tbody tr>.dtfc-fixed-start,
+table.fixed-columns-table.dataTable tbody tr>.dtfc-fixed-end {
+
+    z-index: 1;
+    background-color: white;
+    /* Ensure stacking */
+}
+
+/* Add shadow effect on last fixed column (left and right) */
+table.fixed-columns-table.dataTable tr>.dtfc-fixed-left::after,
+table.fixed-columns-table.dataTable tr>.dtfc-fixed-right::after {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 10px;
+    transition: box-shadow 0.3s;
+    content: "";
+    pointer-events: none;
+    /* Transparent shadow area */
+}
+
+table.fixed-columns-table.dataTable tr>.dtfc-fixed-left::after {
+    right: 0;
+    transform: translateX(100%);
+}
+
+table.fixed-columns-table.dataTable tr>.dtfc-fixed-right::after {
+    left: 0;
+    transform: translateX(-80%);
+}
+
+table.fixed-columns-table.dataTable.dtfc-scrolling-left tr>.dtfc-fixed-left::after {
+    box-shadow: inset 10px 0 8px -8px rgba(0, 0, 0, 0.2);
+}
+
+table.fixed-columns-table.dataTable.dtfc-scrolling-right tr>.dtfc-fixed-right::after {
+    box-shadow: inset -10px 0 8px -8px rgba(0, 0, 0, 0.2);
+}
+
+table.fixed-columns-table.dataTable.dtfc-scrolling-right tr>.dtfc-fixed-right+.dtfc-fixed-right::after {
+    box-shadow: none;
+}
+
+div.dt-scroll,
+div.dtfh-floatingparent {
+    position: relative;
+}
+
+div.dt-scroll div.dtfc-top-blocker,
+div.dt-scroll div.dtfc-bottom-blocker,
+div.dtfh-floatingparent div.dtfc-top-blocker,
+div.dtfh-floatingparent div.dtfc-bottom-blocker {
+    position: absolute;
+    background-color: white;
+}
+
+/* Dark mode */
+
+html.dark table.dataTable thead tr>.dtfc-fixed-start,
+html.dark table.dataTable thead tr>.dtfc-fixed-end,
+html.dark table.dataTable tfoot tr>.dtfc-fixed-start,
+html.dark table.dataTable tfoot tr>.dtfc-fixed-end {
+    background-color: var(--dt-html-background);
+}
+
+html.dark table.dataTable tbody tr>.dtfc-fixed-start,
+html.dark table.dataTable tbody tr>.dtfc-fixed-end {
+    background-color: var(--dt-html-background);
+}
+
+html.dark table.dataTable.dtfc-scrolling-left tbody>tr>.dtfc-fixed-left::after {
+    box-shadow: inset 10px 0 8px -8px rgba(0, 0, 0, 0.3);
+}
+
+html.dark table.dataTable.dtfc-scrolling-right tbody>tr>.dtfc-fixed-right::after {
+    box-shadow: inset -10px 0 8px -8px rgba(0, 0, 0, 0.3);
+}
+
+html.dark table.dataTable.dtfc-scrolling-right tbody>tr>.dtfc-fixed-right+.dtfc-fixed-right::after {
+    box-shadow: none;
+}
+
+html.dark div.dtfc-top-blocker,
+html.dark div.dtfc-bottom-blocker {
+    background-color: var(--dt-html-background);
+}
+
+/* Ensure borders remain intact */
+table.fixed-columns-table.dataTable {
+    border-collapse: collapse;
+}
+
+table.fixed-columns-table.dataTable thead th,
+table.fixed-columns-table.dataTable tbody td {
+    border: 1px solid #dee2e6;
+}
+
+.select2-container .select2-selection--multiple .select2-selection__choice {
+    background-color: #2074BA;
+    border: none;
+    color: #fff;
+    border-radius: 3px;
+    padding: 3px;
+    margin-top: 6px;
+}
+
+.btn-soft-custom-danger {
+    --vz-btn-color: #f06548;
+    --vz-btn-bg: rgba(240, 101, 72, 0.1);
+    --vz-btn-border-color: transparent;
+    --vz-btn-hover-color: #f06548;
+    --vz-btn-hover-bg: rgba(240, 101, 72, 0.1);
+    --vz-btn-hover-border-color: transparent;
+    --vz-btn-focus-shadow-rgb: 240, 101, 72;
+    --vz-btn-active-color: #f06548;
+    --vz-btn-active-bg: rgba(240, 101, 72, 0.1);
+    --vz-btn-active-border-color: transparent;
+}
+
+.btn-soft-custom-success {
+    --vz-btn-color: #0ab39c;
+    --vz-btn-bg: rgba(10, 179, 156, 0.1);
+    --vz-btn-border-color: transparent;
+    --vz-btn-hover-color: #0ab39c;
+    --vz-btn-hover-bg: rgba(10, 179, 156, 0.1);
+    --vz-btn-hover-border-color: transparent;
+    --vz-btn-focus-shadow-rgb: 10, 179, 156;
+    --vz-btn-active-color: var(--vz-btn-hover-color);
+    --vz-btn-active-bg: rgba(10, 179, 156, 0.1);
+    --vz-btn-active-border-color: transparent;
+}
+
+.btn-soft-custom-primary {
+    --vz-btn-color: #2074BA;
+    --vz-btn-bg: rgba(64, 81, 137, 0.1);
+    --vz-btn-border-color: transparent;
+    --vz-btn-hover-color: #2074BA;
+    --vz-btn-hover-bg: rgba(64, 81, 137, 0.1);
+    --vz-btn-hover-border-color: transparent;
+    --vz-btn-focus-shadow-rgb: 64, 81, 137;
+    --vz-btn-active-color: var(--vz-btn-hover-color);
+    --vz-btn-active-bg: rgba(64, 81, 137, 0.1);
+    --vz-btn-active-border-color: transparent;
+}
+
+.btn-soft-custom-warning {
+    --vz-btn-color: var(--vz-warning);
+    --vz-btn-bg: var(--vz-warning-bg-subtle);
+    --vz-btn-border-color: transparent;
+    --vz-btn-hover-bg: var(--vz-warning);
+    --vz-btn-hover-border-color: transparent;
+    --vz-btn-focus-shadow-rgb: var(--vz-warning-rgb);
+    --vz-btn-active-bg: var(--vz-warning);
+    --vz-btn-active-border-color: transparent;
+}
+
+.dt-new-row {
+    color: #2074BA;  
+}
+.dt-updated-row {
+    background-color: #ffff99; /* Light yellow */
+    transition: background-color 1s ease;
+}
+
+.profile-wid-bg::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    opacity: .9;
+    background: #2074BA;
+}
+/* Flatpickr year spinner arrows: always visible and white */
+.flatpickr-current-month .numInputWrapper span {
+    opacity: 1 !important;
+}
+
+.flatpickr-current-month .numInputWrapper span.arrowUp:after {
+    border-bottom-color: #fff !important;
+}
+
+.flatpickr-current-month .numInputWrapper span.arrowDown:after {
+    border-top-color: #fff !important;
+}

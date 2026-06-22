@@ -1,0 +1,426 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page {
+      margin: 22mm 14mm 30mm 14mm;
+    }
+
+    body {
+      font-family: DejaVu Sans, Arial, sans-serif;
+      font-size: 12px;
+      color: #1f2937;
+      line-height: 1.35;
+    }
+
+    .small {
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .blue {
+      color: #111827;
+    }
+
+    .bold {
+      font-weight: 700;
+    }
+
+    .header-table,
+    .meta-table,
+    .table-grid,
+    .split-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .header-table td {
+      vertical-align: top;
+      padding: 0;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .right {
+      text-align: right;
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .mt-6 {
+      margin-top: 6px;
+    }
+
+    .mt-10 {
+      margin-top: 10px;
+    }
+
+    .mt-14 {
+      margin-top: 14px;
+    }
+
+    .logo {
+      width: 74px;
+      height: auto;
+      margin: 0 auto 4px auto;
+      display: block;
+    }
+
+    h1 {
+      font-size: 18px;
+      margin: 10px 0 12px 0;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 14px;
+      margin: 10px 0 2px 0;
+      font-weight: 700;
+    }
+
+    .meta-table td {
+      padding: 5px 6px;
+      vertical-align: middle;
+    }
+
+    .meta-col-label {
+      width: 12%;
+      font-size: 11px;
+      color: #4b5563;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .meta-col-value {
+      width: 26%;
+      font-size: 12px;
+      color: #111827;
+      line-height: 1.25;
+    }
+
+    .meta-col-label-2 {
+      width: 26%;
+      font-size: 11px;
+      color: #4b5563;
+      font-weight: 700;
+      white-space: nowrap;
+      padding-left: 10px !important;
+    }
+
+    .meta-col-value-2 {
+      width: 36%;
+      font-size: 12px;
+      color: #111827;
+      white-space: normal;
+      word-break: break-word;
+      line-height: 1.25;
+    }
+
+    .table-grid th,
+    .table-grid td {
+      border: 1px solid #000;
+      padding: 5px 6px;
+      vertical-align: top;
+      font-size: 12px;
+      color: #111827;
+      line-height: 1.35;
+    }
+
+    .table-grid th {
+      font-weight: 700;
+      text-align: left;
+      background: #fff;
+    }
+
+    .table-grid td.placeholder-row {
+      height: 24px;
+    }
+
+    .split-table td {
+      vertical-align: top;
+      width: 50%;
+      padding: 0;
+    }
+
+    .split-left {
+      padding-right: 16px;
+    }
+
+    .split-right {
+      padding-left: 16px;
+    }
+
+    .leader-title {
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.25;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .leader-sub {
+      font-size: 11px;
+      line-height: 1.25;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .logo-caption {
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .kv-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin-top: 4px;
+    }
+
+    .kv-table td {
+      border: 1px solid #000;
+      padding: 5px 6px;
+      vertical-align: top;
+      font-size: 12px;
+      color: #111827;
+      line-height: 1.35;
+    }
+
+    .kv-label {
+      width: 34%;
+      color: #4b5563;
+      font-weight: 700;
+    }
+
+    .kv-value {
+      width: 66%;
+      color: #111827;
+    }
+
+    .comment-box {
+      border: 1px solid #000;
+      min-height: 58px;
+      padding: 7px;
+      margin-top: 4px;
+      font-size: 12px;
+      color: #111827;
+      line-height: 1.35;
+      white-space: pre-wrap;
+      word-break: break-word;
+      page-break-inside: auto;
+      break-inside: auto;
+      orphans: 3;
+      widows: 3;
+    }
+
+    .comment-section {
+      page-break-inside: auto;
+      break-inside: auto;
+    }
+
+    .comment-section h2 {
+      page-break-after: avoid;
+      break-after: avoid-page;
+    }
+
+    .daily-images-section {
+      page-break-inside: auto;
+      break-inside: auto;
+    }
+
+    .daily-images-grid {
+      margin-top: 6px;
+      font-size: 0;
+    }
+
+    .daily-image-item {
+      display: inline-block;
+      width: 48%;
+      margin: 0 2% 12px 0;
+      vertical-align: top;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .daily-image-item:nth-child(2n) {
+      margin-right: 0;
+    }
+
+    .daily-image-frame {
+      border: 1px solid #000;
+      padding: 6px;
+      text-align: center;
+      min-height: 140px;
+    }
+
+    .daily-image-frame img {
+      max-width: 100%;
+      max-height: 220px;
+      height: auto;
+      display: inline-block;
+    }
+
+    .daily-image-caption {
+      margin-top: 4px;
+      font-size: 12px;
+      line-height: 1.35;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .footer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      font-size: 11px;
+      color: #1f2937;
+    }
+
+    .footer-line {
+      border-top: 1px solid #cfd6e2;
+      margin-bottom: 4px;
+    }
+
+    .footer-row {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .footer-row td {
+      padding: 0;
+      vertical-align: top;
+    }
+
+    .footer-left {
+      width: 42%;
+      text-align: left;
+    }
+
+    .footer-right {
+      width: 58%;
+      text-align: right;
+    }
+
+    .link {
+      color: #1f2937;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <table class="header-table">
+    <tr>
+      <td style="width: 37%;">
+        <div class="leader-title">{{report_header_line_1}}</div>
+        <div class="leader-sub">{{report_header_line_2}}</div>
+        <div class="small" style="height: 8px;"></div>
+        <div class="leader-title">{{report_header_line_3}}</div>
+        <div class="leader-sub">{{report_header_line_4}}</div>
+      </td>
+      <td style="width: 26%;" class="center">
+        <img class="logo" alt="Carbone Clinic"
+          src="{{report_logo_data_uri}}">
+        <div class="logo-caption">{{report_header_center_caption}}</div>
+      </td>
+      <td style="width: 37%;" class="right">
+        <div class="small">{{report_phone}}</div>
+        <div class="small"><span class="link">{{report_website}}</span></div>
+        <div class="small">{{report_location_line}}</div>
+      </td>
+    </tr>
+  </table>
+
+  <h1>Daily Data Sheet</h1>
+
+  <table class="meta-table">
+    <tr>
+      <td class="meta-col-label">Learner:</td>
+      <td class="meta-col-value blue">{{learner_name}}</td>
+      <td class="meta-col-label-2">Date and Session Time</td>
+      <td class="meta-col-value-2 blue">{{report_date}}</td>
+    </tr>
+    <tr>
+      <td class="meta-col-label">Tutor:</td>
+      <td class="meta-col-value blue">{{tutor_names}}</td>
+      <td class="meta-col-label-2">NET vs DTI:</td>
+      <td class="meta-col-value-2 blue">{{net_vs_dti}}</td>
+    </tr>
+  </table>
+
+  <h2>Program probes</h2>
+
+  <table class="table-grid mt-6">
+    <tr>
+      <th>Domain</th>
+      <th>Goal</th>
+      <th>Target</th>
+      <th>Probe</th>
+    </tr>
+    {{program_probes_table}}
+  </table>
+
+  <table class="split-table mt-14">
+    <tr>
+      <td class="split-left">
+        <h2 style="margin-top: 0;">Mand Data</h2>
+        <table class="kv-table">
+          <tr>
+            <td class="kv-label">Frequency</td>
+            <td class="kv-value">{{mands_frequency}}</td>
+          </tr>
+          <tr>
+            <td class="kv-label">Variety</td>
+            <td class="kv-value">{{mands_variety}}</td>
+          </tr>
+        </table>
+      </td>
+      <td class="split-right">
+        <h2 style="margin-top: 0;">Problem Behaviour Data</h2>
+        <table class="kv-table">
+          <tr>
+            <td class="kv-label">Frequency</td>
+            <td class="kv-value">{{problem_behavior_frequency}}</td>
+          </tr>
+          <tr>
+            <td class="kv-label">Duration</td>
+            <td class="kv-value">{{problem_behavior_duration}}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <div class="comment-section">
+    <h2 class="mt-14">Comments</h2>
+    <div class="comment-box">{{tutor_comments}}</div>
+  </div>
+
+  {{uploaded_images_html}}
+
+  <div class="comment-section">
+    <h2 class="mt-10">Wow Moments</h2>
+    <div class="comment-box">{{wow_moments}}</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-line"></div>
+    <table class="footer-row">
+      <tr>
+        <td class="footer-left">{{report_footer_company}}</td>
+        <td class="footer-right">{{report_footer_address_line_1}}</td>
+      </tr>
+      <tr>
+        <td class="footer-left"></td>
+        <td class="footer-right">{{report_footer_address_line_2}}</td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>
+

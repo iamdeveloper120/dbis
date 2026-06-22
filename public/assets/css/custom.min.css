@@ -1,0 +1,125 @@
+/*# sourceMappingURL=custom.min.css.map */
+.body-bg {
+    background: url(/assets/images/chat-bg-pattern.png);
+    background-color: var(--vz-body-bg);
+}
+
+/**DataTable CSS Overrides**/
+div.dt-container .dt-paging .dt-paging-button {
+    box-sizing: border-box;
+    display: inline-block;
+    min-width: 1.5em;
+    padding: 0;
+    margin-left: 2px;
+    text-align: center;
+    text-decoration: none !important;
+    cursor: pointer;
+    color: inherit !important;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: transparent;
+}
+
+div.dt-buttons {
+    position: initial;
+    column-gap: 2px;
+}
+
+.dt-buttons :is(button.dt-button, div.dt-button, a.dt-button, input.dt-button) {
+    border-color: var(--vz-border-color);
+    background: rgba(0, 0, 0, 0);
+    color: var(--vz-body-color);
+}
+
+
+/* Custom CSS to reduce DataTables row height */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    margin-bottom: 10px;
+}
+
+table.dataTable tbody tr {
+    height: 30px;
+    /* Adjust this value to set the desired row height */
+}
+
+table.dataTable td {
+    padding: 4px 10px;
+    /* Adjust padding to control cell height */
+}
+
+table.dataTable tbody tr:hover {
+    background-color: #f5f5f5;
+    /* Adjust the color as needed */
+}
+
+
+/* Custom styles for the Swal select input */
+.swal2-select {
+    background-color: #f8f9fa;
+    /* Light background color */
+    border: 1px solid #ced4da;
+    /* Border color */
+    border-radius: 4px;
+    /* Rounded corners */
+    padding: 8px 12px;
+    /* Padding inside the select */
+    font-size: 14px;
+    /* Font size */
+    color: #495057;
+    /* Text color */
+    min-width: 50%;
+    max-width: 85%;
+    /* Ensure the select input does not exceed the modal width */
+    box-sizing: border-box;
+    /* Include padding and border in the element's width */
+}
+
+/* Adjust the appearance on hover */
+.swal2-select:hover {
+    border-color: #80bdff;
+    /* Border color on hover */
+    background-color: #e9ecef;
+    /* Background color on hover */
+}
+
+/* Focus style */
+.swal2-select:focus {
+    border-color: #2074BA;
+    /* Border color on focus */
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    /* Focus shadow */
+    background-color: #ffffff;
+    /* Background color on focus */
+}
+
+.swal2-confirm.btn-primary {
+    background-color: #2074BA !important;
+    color: white !important;
+    border-radius: 5px !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+}
+
+.swal2-cancel.btn-light {
+    background-color: #ced4da !important;
+    color: black !important;
+    border-radius: 5px !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+}
+
+.profile-wid-bg::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    opacity: .9;
+    background: #2074BA;
+}

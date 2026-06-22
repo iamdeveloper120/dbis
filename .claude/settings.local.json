@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php --version)",
+      "Bash(valet --version)",
+      "Bash(mysql --version)",
+      "Bash(mysql *)",
+      "Bash(valet links *)",
+      "Bash(valet parked *)",
+      "Read(//home/muhammad-farhan/.config/valet/**)",
+      "Read(//home/muhammad-farhan/.valet/**)",
+      "Read(//home/muhammad-farhan/**)",
+      "Read(//tmp/**)",
+      "Bash(chmod -R 755 /home/muhammad-farhan/Sites/dbis/writable)",
+      "Bash(chmod -R 777 /home/muhammad-farhan/Sites/dbis/writable/session /home/muhammad-farhan/Sites/dbis/writable/logs /home/muhammad-farhan/Sites/dbis/writable/cache)",
+      "Bash(curl *)",
+      "Bash(composer update *)",
+      "Bash(sudo chown -R muhammad-farhan:muhammad-farhan /home/muhammad-farhan/Sites/dbis/vendor/)",
+      "Bash(chmod -R 755 /home/muhammad-farhan/Sites/dbis/vendor/)",
+      "Bash(php -r 'require '\\\\''/home/muhammad-farhan/Sites/dbis/vendor/autoload.php'\\\\''; $app = new \\\\CodeIgniter\\\\App\\(\\); $c = config\\('\\\\''Paths'\\\\''\\); var_dump\\($c\\);')",
+      "Bash(python3 -c \"import sys; data=sys.stdin.read\\(\\); print\\(data[:3000]\\)\")",
+      "Bash(awk '{print $1}')",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(git init *)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(git restore *)",
+      "Bash(git reset *)",
+      "Bash(git rm *)",
+      "Bash(git commit *)"
+    ]
+  }
+}

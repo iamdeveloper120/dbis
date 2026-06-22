@@ -1,0 +1,179 @@
+#-------------------------
+# Operating Specific Junk Files
+#-------------------------
+
+# OS X
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# OS X Thumbnails
+._*
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# Linux
+*~
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+#-------------------------
+# Environment Files
+#-------------------------
+# These should never be under version control,
+# as it poses a security risk.
+.env
+.vagrant
+Vagrantfile
+
+#-------------------------
+# Temporary Files
+#-------------------------
+writable/cache/*
+!writable/cache/index.html
+
+writable/logs/*
+!writable/logs/index.html
+
+writable/session/*
+!writable/session/index.html
+
+writable/uploads/*
+!writable/uploads/index.html
+
+writable/debugbar/*
+!writable/debugbar/.gitkeep
+
+writable/reports/*
+!writable/reports/index.html
+!writable/reports/templates/
+!writable/reports/templates/**
+
+php_errors.log
+
+#-------------------------
+# User Guide Temp Files
+#-------------------------
+user_guide_src/build/*
+user_guide_src/cilexer/build/*
+user_guide_src/cilexer/dist/*
+user_guide_src/cilexer/pycilexer.egg-info/*
+
+#-------------------------
+# Test Files
+#-------------------------
+tests/coverage*
+
+# Don't save phpunit under version control.
+phpunit
+
+#-------------------------
+# Composer
+#-------------------------
+vendor/
+
+#-------------------------
+# IDE / Development Files
+#-------------------------
+
+# Modules Testing
+_modules/*
+
+# phpenv local config
+.php-version
+
+# Jetbrains editors (PHPStorm, etc)
+.idea/
+*.iml
+
+# Netbeans
+nbproject/
+build/
+nbbuild/
+dist/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+.nb-gradle/
+
+# Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+.phpintel
+/api/
+
+# Visual Studio Code
+.vscode/
+
+/results/
+/phpunit*.xml
+
+#-------------------------
+# React App (Frontend)
+#-------------------------
+React/node_modules/
+React/dist/
+React/build/
+React/.vite/
+React/.eslintcache
+React/.DS_Store
+React/.vscode/
+React/.idea/
+React/*.log
+React/*.local
+React/*.suo
+React/*.ntvs*
+React/*.njsproj
+React/*.sln
+React/*.sw?
+
+
+#-------------------------
+# Git Patch / Backup / Conflict Files
+#-------------------------
+*.orig
+*.rej
+*.patch
+*.bak
+*.backup
+
+#-------------------------
+# Env Variants
+#-------------------------
+.env.*
+.env.backup
+
+#-------------------------
+# Deployment Local Files
+#-------------------------
+deployment/deploy.servers.local.json
+deployment/.last_deploy_commit
+deployment/.last_preview_commit
+
+#-------------------------
+# React Build Outputs (Optional - include with force on staging/master)
+#-------------------------
+public/react/
+public/assets/react/
