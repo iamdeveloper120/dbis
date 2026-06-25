@@ -114,8 +114,15 @@
                     </li>
                 <?php endif; ?>
 
-
-
+                <!-- Run Session -->
+                <?php if (auth()->user()->can('sessions.live.run')): ?>
+                    <li>
+                        <a href="<?= base_url('sessions/live/client/' . encodeValue($client->id)) ?>">
+                            <i class="bx bx-play-circle align-bottom me-2"></i>
+                            <span class="file-list-link">Run Session</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
 
                 <!-- Client -->
                 <?php if (auth()->user()->can('client-profile.client.access')): ?>

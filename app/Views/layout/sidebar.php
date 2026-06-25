@@ -39,59 +39,14 @@
                 <!-- Divider -->
                 <hr class="sidebar-divider my-0">
 
-                <!-- KPI's Section -->
-                <?php if (auth()->user()->can('kpi.access')) : ?>
-                    <li class="nav-item">
-                        <a class="nav-link menu-link" href="#KPIMenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="KPIMenu">
-                            <i class="bx bx-tachometer"></i>
-                            <span data-key="clientMenu">KPI's</span>
-                        </a>
-                        <div class="collapse menu-dropdown" id="KPIMenu">
-                            <ul class="nav nav-sm flex-column">
-                                <?php if (auth()->user()->can('kpi.rate-data.view')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/kpi/rate-data" data-key="t-kpi-rate-data">Rate Data</a>
-                                    </li>
-                                <?php endif ?>
-                                <?php if (auth()->user()->can('kpi.client-target.view')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/kpi/client-target" data-key="t-client-target">Client's Target</a>
-                                    </li>
-                                <?php endif ?>
-                                <?php if (auth()->user()->can('kpi.supervisor-target.view')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/kpi/supervisor-target" data-key="t-supervisor-target">Supervisor's Target</a>
-                                    </li>
-                                <?php endif ?>
-                            </ul>
-                        </div>
-                    </li>
-                    <hr class="sidebar-divider my-0">
-                <?php endif ?>
 
                 <!-- Sessions Section -->
-                <?php if (auth()->user()->can('sessions.access')) : ?>
+                <?php if (auth()->user()->can('sessions.daily.view')) : ?>
                     <li class="nav-item">
-                        <a class="nav-link menu-link" href="#SessionMenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="SessionMenu">
+                        <a class="nav-link menu-link" href="/sessions/daily">
                             <i class="bx bxs-calendar-check"></i>
                             <span data-key="SessionMenu">Sessions</span>
                         </a>
-                        <div class="collapse menu-dropdown" id="SessionMenu">
-                            <ul class="nav nav-sm flex-column">
-                                <?php if (auth()->user()->can('sessions.live.run')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/sessions/live" data-key="t-sessions">Run Session</a>
-                                    </li>
-
-                                <?php endif ?>
-                                <?php if (auth()->user()->can('sessions.daily.view')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/sessions/daily" data-key="t-daily-sessions">Completed Sessions</a>
-                                    </li>
-                                <?php endif ?>
-
-                            </ul>
-                        </div>
                     </li>
                     <hr class="sidebar-divider my-0">
                 <?php endif ?>
@@ -135,91 +90,8 @@
                     <hr class="sidebar-divider my-0">
                 <?php endif ?>
 
-                <!-- Graphs Section -->
-                <?php if (auth()->user()->can('graphs.access')) : ?>
-                    <li class="nav-item">
-                        <a class="nav-link menu-link" href="#GraphMenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="GraphMenu">
-                            <i class="ri-line-chart-line"></i>
-                            <span data-key="GraphMenu">Graphs</span>
-                        </a>
-                        <div class="collapse menu-dropdown" id="GraphMenu">
-                            <ul class="nav nav-sm flex-column">
-                                <?php if (auth()->user()->can('graphs.daily-data.view')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link menu-link" href="/graphs/dailyData" data-key="t-graphs-daily">
-                                            Daily Data Graphs
-                                        </a>
-                                    </li>
-
-                                <?php endif ?>
-
-                                <?php if (auth()->user()->can('graphs.cumulative.view')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/graphs/cumulative" data-key="t-graphs-cumulative">
-                                            Cumulative Graph
-                                        </a>
-                                    </li>
-
-                                <?php endif ?>
 
 
-
-                                <?php if (auth()->user()->can('graphs.rate.view')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/graphs/rate" data-key="t-graphs-rate">
-                                            Rate Graphs
-                                        </a>
-                                    </li>
-
-                                <?php endif ?>
-                                <?php if (auth()->user()->can('graphs.mands.view')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/graphs/mands" data-key="t-graphs-mands">
-                                            Mand Graphs
-                                        </a>
-                                    </li>
-
-                                <?php endif ?>
-                                <?php if (auth()->user()->can('graphs.stimulus-response-chain.view')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/graphs/stimulus-response-chain" data-key="t-graphs-stimulus-response-chain">
-                                            Stimulus Response Chain
-                                        </a>
-                                    </li>
-
-                                <?php endif ?>
-
-                            </ul>
-                        </div>
-                    </li>
-                    <hr class="sidebar-divider my-0">
-                <?php endif ?>
-
-
-                <!-- Reporting -->
-                <?php if (auth()->user()->can('reporting.access')) : ?>
-                    <li class="nav-item">
-                        <a class="nav-link menu-link" href="#ReportingMenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="ReportingMenu">
-                            <i class="ri-file-chart-line"></i>
-                            <span data-key="ReportingMenu">Reports</span>
-                        </a>
-                        <div class="collapse menu-dropdown" id="ReportingMenu">
-                            <ul class="nav nav-sm flex-column">
-                                <?php if (auth()->user()->can('reporting.daily.view')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/reports/daily" data-key="t-reporting-daily">Daily Report</a>
-                                    </li>
-                                <?php endif ?>
-                                <?php if (auth()->user()->can('reporting.progress.view')) : ?>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/reports/progress" data-key="t-reporting-progress">Progress Report</a>
-                                    </li>
-                                <?php endif ?>
-                            </ul>
-                        </div>
-                    </li>
-                    <hr class="sidebar-divider my-0">
-                <?php endif ?>
 
 
                 <!-- Client Profile -->
