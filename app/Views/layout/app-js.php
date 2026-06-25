@@ -2,6 +2,7 @@
 <script src="/assets/js/app.js"></script>
 
 <script>
+    var mapboxToken = "<?= esc(env('MAPBOX_TOKEN', ''), 'js') ?>";
     /****************************** */
     $(document).ajaxComplete(function(event, xhr) {
         if (xhr.status == 401) {
