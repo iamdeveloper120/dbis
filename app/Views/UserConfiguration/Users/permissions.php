@@ -50,15 +50,6 @@
                                     <?= view(
                                         'UserConfiguration/Users/_permission_table',
                                         [
-                                            'permission_card_title' => 'KPI',
-                                            'permission_card_id' => 'KPI',
-                                            'permission_comparison' => 'kpi',
-                                            'user' => $user
-                                        ]
-                                    ) ?>
-                                    <?= view(
-                                        'UserConfiguration/Users/_permission_table',
-                                        [
                                             'permission_card_title' => 'Sessions Menu Access',
                                             'permission_card_id' => 'Session_Menu',
                                             'permission_comparison' => 'sessions.access',
@@ -149,77 +140,9 @@
                                     <?= view(
                                         'UserConfiguration/Users/_permission_table',
                                         [
-                                            'permission_card_title' => 'Graphs Menu Access',
-                                            'permission_card_id' => 'Graphs_Menu',
-                                            'permission_comparison' => 'graphs.access',
-                                            'user' => $user
-                                        ]
-                                    ) ?>
-
-                                    <?= view(
-                                        'UserConfiguration/Users/_permission_table',
-                                        [
-                                            'permission_card_title' => 'Daily Data Graphs',
-                                            'permission_card_id' => 'Daily_Data_Graphs',
-                                            'permission_comparison' => 'graphs.daily-data',
-                                            'user' => $user
-                                        ]
-                                    ) ?>
-
-                                    <?= view(
-                                        'UserConfiguration/Users/_permission_table',
-                                        [
-                                            'permission_card_title' => 'Cumulative Graphs',
-                                            'permission_card_id' => 'Cumulative_Graphs',
-                                            'permission_comparison' => 'graphs.cumulative',
-                                            'user' => $user
-                                        ]
-                                    ) ?>
-
-                                    <?= view(
-                                        'UserConfiguration/Users/_permission_table',
-                                        [
-                                            'permission_card_title' => 'Rate Graphs',
-                                            'permission_card_id' => 'Rate_Graphs',
-                                            'permission_comparison' => 'graphs.rate',
-                                            'user' => $user
-                                        ]
-                                    ) ?>
-
-                                    <?= view(
-                                        'UserConfiguration/Users/_permission_table',
-                                        [
-                                            'permission_card_title' => 'Mand Graphs',
-                                            'permission_card_id' => 'Mands_Graphs',
-                                            'permission_comparison' => 'graphs.mands',
-                                            'user' => $user
-                                        ]
-                                    ) ?>
-                                    <?= view(
-                                        'UserConfiguration/Users/_permission_table',
-                                        [
-                                            'permission_card_title' => 'Stimulus Response Chain Graphs',
-                                            'permission_card_id' => 'Stimulus_Response_Chain_Graphs',
-                                            'permission_comparison' => 'graphs.stimulus-response-chain',
-                                            'user' => $user
-                                        ]
-                                    ) ?>
-
-                                    <?= view(
-                                        'UserConfiguration/Users/_permission_table',
-                                        [
                                             'permission_card_title' => 'Client Profile',
                                             'permission_card_id' => 'Client_Profile',
                                             'permission_comparison' => 'client-profile',
-                                            'user' => $user
-                                        ]
-                                    ) ?>
-                                    <?= view(
-                                        'UserConfiguration/Users/_permission_table',
-                                        [
-                                            'permission_card_title' => 'Reports',
-                                            'permission_card_id' => 'Daily_Reports',
-                                            'permission_comparison' => 'reporting',
                                             'user' => $user
                                         ]
                                     ) ?>

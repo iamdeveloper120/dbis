@@ -13,12 +13,26 @@ use App\Models\ClientProgram\ClientProgramModel;
 use App\Models\Mands\ClientMandsDefaultReinforcerModel;
 use App\Models\Mands\ClientMandsReinforcerModel;
 use App\Models\Mands\ClientMandsReinforcerMediaModel;
+use App\Services\Reports\DailyReportService;
+use App\Services\Reports\DailyReportEmailService;
 use App\Services\Reports\ProgressReportService;
+use App\Libraries\Reports\ReportEmailStatus;
+use App\Models\Reports\DailyReportQueryModel;
 use App\Services\ClientProfileDashboardService;
+use Throwable;
 use App\Models\ClientProblemBehavior\ClientAbcItemModel;
 use App\Models\ClientProblemBehavior\MasterAbcItemModel;
 use CodeIgniter\HTTP\Files\UploadedFile;
 use CodeIgniter\Exceptions\PageNotFoundException;
+use App\Models\ClientGraphs\DailyDataGraphsModel;
+use App\Models\ClientGraphs\CumulativeGraphsModel;
+use App\Models\ClientGraphs\RateGraphsModel;
+use App\Models\ClientGraphs\MandsGraphsModel;
+use App\Models\ClientGraphs\StimulusResponseChainGraphsModel;
+use App\Models\ClientGraphs\PhaseLineModel;
+use App\Models\ClientGraphs\TargetMonthModel;
+use App\Entities\ClientGraphs\PhaseLine;
+use App\Entities\ClientGraphs\TargetMonth;
 
 
 //use function PHPUnit\Framework\isNull;
@@ -40,6 +54,8 @@ class ClientProfileController extends AdminController
     private const IMAGE_MAX_COUNT_LIMIT = 100;
     private const VIDEO_MAX_COUNT_LIMIT = 100;
     private const MEDIA_ROOT = 'uploads/client-mands-reinforcer/';
+
+    protected DailyReportService $dailyReportService;
 
     protected $clientModel;
     protected $clientProgramModel;
@@ -64,6 +80,7 @@ class ClientProfileController extends AdminController
         $this->clientProgramModel = new ClientProgramModel();
         $this->clientMandsReinforcerModel = new ClientMandsReinforcerModel();
         $this->clientMandsReinforcerMediaModel = new ClientMandsReinforcerMediaModel();
+        $this->dailyReportService = new DailyReportService();
     }
     /******************************************************************** */
     // Common Client Data for profile
@@ -1319,6 +1336,468 @@ class ClientProfileController extends AdminController
         ));
     }
 
+    /************************************************************************* Graph data endpoints */
+
+    public function graphsDailyData(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $start_date = $this->request->getPost('start_date');
+        $end_date   = $this->request->getPost('end_date');
+
+        if ($start_date != '' || $end_date != '') {
+            $rules = [
+                'start_date' => ['label' => 'Start Date', 'rules' => 'required|valid_date', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} not a valid date']],
+                'end_date'   => ['label' => 'End Date', 'rules' => 'required|valid_date|compareDates[start_date,end_date,{$start_date,$end_date}]', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} not a valid date', 'compareDates' => '{field} must be greater then Start Date']],
+            ];
+            $data = ['start_date' => $start_date, 'end_date' => $end_date];
+            if (!$this->validateData($data, $rules)) {
+                return $this->response->setJSON(['status' => 'validation_error', 'statusText' => 'Error', 'message' => $this->validator->getErrors(), 'data' => '']);
+            }
+            $start_date = stringToDate($start_date, 'Y-m-d');
+            $end_date   = stringToDate($end_date, 'Y-m-d');
+        } else {
+            $start_date = null;
+            $end_date   = null;
+        }
+
+        $model = model(DailyDataGraphsModel::class);
+        $graph_data = $model->get_client_session_data_for_graphs($client_id, $start_date, $end_date);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => 'List', 'data' => $graph_data]);
+    }
+
+    public function graphsMandsData(string $encodedClientId)
+    {
+        $client_id  = decodeValue($encodedClientId);
+        $start_date = $this->request->getPost('start_date');
+        $end_date   = $this->request->getPost('end_date');
+
+        if ($start_date != '' || $end_date != '') {
+            $rules = [
+                'start_date' => ['label' => 'Start Date', 'rules' => 'required|valid_date', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} not a valid date']],
+                'end_date'   => ['label' => 'End Date', 'rules' => 'required|valid_date|compareDates[start_date,end_date,{$start_date,$end_date}]', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} not a valid date', 'compareDates' => '{field} must be greater then Start Date']],
+            ];
+            $data = ['start_date' => $start_date, 'end_date' => $end_date];
+            if (!$this->validateData($data, $rules)) {
+                return $this->response->setJSON(['status' => 'validation_error', 'statusText' => 'Error', 'message' => $this->validator->getErrors(), 'data' => '']);
+            }
+            $start_date = stringToDate($start_date, 'Y-m-d');
+            $end_date   = stringToDate($end_date, 'Y-m-d');
+        } else {
+            $start_date = null;
+            $end_date   = null;
+        }
+
+        $model      = model(MandsGraphsModel::class);
+        $graph_data = $model->getMandsSummaryDataForGraphs($client_id, $start_date, $end_date);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => 'List', 'data' => $graph_data]);
+    }
+
+    public function graphsCumulativeData(string $encodedClientId)
+    {
+        $client_id  = decodeValue($encodedClientId);
+        $start_date = $this->request->getPost('start_date');
+        $end_date   = $this->request->getPost('end_date');
+
+        if ($start_date != '' || $end_date != '') {
+            $rules = [
+                'start_date' => ['label' => 'Start Date', 'rules' => 'required|valid_date', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} not a valid date']],
+                'end_date'   => ['label' => 'End Date', 'rules' => 'required|valid_date|compareDates[start_date,end_date,{$start_date,$end_date}]', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} not a valid date', 'compareDates' => '{field} must be greater then Start Date']],
+            ];
+            $data = ['start_date' => $start_date, 'end_date' => $end_date];
+            if (!$this->validateData($data, $rules)) {
+                return $this->response->setJSON(['status' => 'validation_error', 'statusText' => 'Error', 'message' => $this->validator->getErrors(), 'data' => '']);
+            }
+            $start_date = stringToDate($start_date, 'Y-m-d');
+            $end_date   = stringToDate($end_date, 'Y-m-d');
+        } else {
+            $start_date = null;
+            $end_date   = null;
+        }
+
+        $model                  = model(CumulativeGraphsModel::class);
+        $cumulative_data        = $model->get_cumulative_data($client_id, $start_date, $end_date);
+        $client                 = $this->clientModel->getClientById($client_id);
+        $clientActiveProgram    = $this->clientModel->clientActiveProgram($client_id);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => 'List', 'data' => $cumulative_data, 'client' => $client, 'clientActiveProgram' => $clientActiveProgram]);
+    }
+
+    public function graphsCumulativePhaselineList(string $encodedClientId)
+    {
+        $client_id  = decodeValue($encodedClientId);
+        $graph_type = $this->request->getPost('graph_type') ?? 'Cumulative';
+        $model      = model(PhaseLineModel::class);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => 'List', 'data' => $model->list($client_id, $graph_type)]);
+    }
+
+    public function graphsCumulativePhaselineCreate(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $data = [
+            'p_date'    => $this->request->getPost('p_date'),
+            'client_id' => $client_id,
+            'graph_type'=> 'Cumulative',
+            'p_key'     => $this->request->getPost('p_key'),
+        ];
+        $rules = [
+            'p_date'  => ['label' => 'Date', 'rules' => 'required|valid_date|is_phase_line_date_exist[p_date]', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} is not valid date']],
+            'p_key'   => ['label' => 'Phase Line Key', 'rules' => 'required', 'errors' => ['required' => '{field} Required']],
+        ];
+        if (!$this->validateData($data, $rules)) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => $this->validator->listErrors('custom_list'), 'data' => '']);
+        }
+        $data['p_date']     = stringToDate($data['p_date'], 'Y-m-d');
+        $data['created_by'] = auth()->user()->id;
+        $model = model(PhaseLineModel::class);
+        $entity = new PhaseLine();
+        $entity->fill($data);
+        $model->save($entity);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => '', 'message' => 'Record created successfully', 'data' => $model->single($model->getInsertID())]);
+    }
+
+    public function graphsCumulativePhaselineGetSelected(string $encodedClientId)
+    {
+        $id = $this->request->getPost('id');
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => 'Record ID Required', 'data' => '']);
+        }
+        $model   = model(PhaseLineModel::class);
+        $rowData = $model->find($id);
+        $rowData->p_date = stringToDate($rowData->p_date, CC_DATE_FORMAT);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => '', 'data' => $rowData]);
+    }
+
+    public function graphsCumulativePhaselineUpdate(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $data = [
+            'id'        => $this->request->getPost('id'),
+            'p_date'    => $this->request->getPost('p_date'),
+            'client_id' => $client_id,
+            'graph_type'=> 'Cumulative',
+            'p_key'     => $this->request->getPost('p_key'),
+        ];
+        $rules = [
+            'id'     => ['label' => 'Record ID', 'rules' => 'required', 'errors' => ['required' => '{field} Required']],
+            'p_date' => ['label' => 'Date', 'rules' => 'required|valid_date|is_phase_line_date_exist[p_date]', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} is not valid date']],
+            'p_key'  => ['label' => 'Phase Line Key', 'rules' => 'required', 'errors' => ['required' => '{field} Required']],
+        ];
+        if (!$this->validateData($data, $rules)) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => $this->validator->listErrors('custom_list'), 'data' => '']);
+        }
+        $data['p_date']     = stringToDate($data['p_date'], 'Y-m-d');
+        $data['updated_by'] = auth()->user()->id;
+        $model  = model(PhaseLineModel::class);
+        $entity = new PhaseLine();
+        $entity->fill($data);
+        $model->save($entity);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => '', 'message' => 'Record updated successfully', 'data' => $model->single($data['id'])]);
+    }
+
+    public function graphsCumulativePhaselineDelete(string $encodedClientId)
+    {
+        $id = $this->request->getPost('id');
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => 'Record ID Required', 'data' => '']);
+        }
+        $model  = model(PhaseLineModel::class);
+        $result = $model->delete($id);
+
+        return $this->response->setJSON($result
+            ? ['status' => 'success', 'statusText' => '', 'message' => 'Record deleted successfully', 'data' => '']
+            : ['status' => 'error', 'statusText' => '', 'message' => 'Contact system administrator', 'data' => '']);
+    }
+
+    public function graphsCumulativeDomains(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $model     = model(CumulativeGraphsModel::class);
+
+        return $this->response->setJSON($model->getDomains($client_id));
+    }
+
+    public function graphsCumulativeDomainGoals(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $domain_id = $this->request->getPost('domain_id');
+        $model     = model(CumulativeGraphsModel::class);
+
+        return $this->response->setJSON($model->getGoalsByDomain($client_id, $domain_id));
+    }
+
+    public function graphsCumulativeDomainAndGoalData(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $domain_id = $this->request->getPost('domain_id');
+        $goal_id   = $this->request->getPost('goal_id');
+
+        $model                  = model(CumulativeGraphsModel::class);
+        $cumulative_data        = $model->get_cumulative_data_by_domain_and_goal($client_id, $domain_id, $goal_id);
+        $client                 = $this->clientModel->getClientById($client_id);
+        $clientActiveProgram    = $this->clientModel->clientActiveProgram($client_id);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => 'List', 'data' => $cumulative_data, 'client' => $client, 'clientActiveProgram' => $clientActiveProgram]);
+    }
+
+    public function graphsRateData(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $model     = model(RateGraphsModel::class);
+        $skill_data = $model->get_target_rate_data($client_id, 'Skills');
+        $doi_data   = $model->get_target_rate_data($client_id, 'DOI');
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => 'List', 'data' => ['skill_data' => $skill_data, 'doi_data' => $doi_data]]);
+    }
+
+    public function graphsRatePhaselineList(string $encodedClientId)
+    {
+        $client_id  = decodeValue($encodedClientId);
+        $graph_type = $this->request->getPost('graph_type') ?? 'Target_Rate';
+        $model      = model(PhaseLineModel::class);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => 'List', 'data' => $model->list($client_id, $graph_type)]);
+    }
+
+    public function graphsRatePhaselineCreate(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $data = [
+            'p_date'    => $this->request->getPost('p_date'),
+            'client_id' => $client_id,
+            'graph_type'=> 'Target_Rate',
+            'p_key'     => $this->request->getPost('p_key'),
+        ];
+        $rules = [
+            'p_date'  => ['label' => 'Date', 'rules' => 'required|valid_date|is_phase_line_date_exist[p_date]', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} is not valid date']],
+            'p_key'   => ['label' => 'Phase Line Key', 'rules' => 'required', 'errors' => ['required' => '{field} Required']],
+        ];
+        if (!$this->validateData($data, $rules)) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => $this->validator->listErrors('custom_list'), 'data' => '']);
+        }
+        $data['p_date']     = stringToDate($data['p_date'], 'Y-m-d');
+        $data['created_by'] = auth()->user()->id;
+        $model  = model(PhaseLineModel::class);
+        $entity = new PhaseLine();
+        $entity->fill($data);
+        $model->save($entity);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => '', 'message' => 'Record created successfully', 'data' => $model->single($model->getInsertID())]);
+    }
+
+    public function graphsRatePhaselineGetSelected(string $encodedClientId)
+    {
+        $id = $this->request->getPost('id');
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => 'Record ID Required', 'data' => '']);
+        }
+        $model   = model(PhaseLineModel::class);
+        $rowData = $model->find($id);
+        $rowData->p_date = stringToDate($rowData->p_date, CC_DATE_FORMAT);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => '', 'data' => $rowData]);
+    }
+
+    public function graphsRatePhaselineUpdate(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $data = [
+            'id'        => $this->request->getPost('id'),
+            'p_date'    => $this->request->getPost('p_date'),
+            'client_id' => $client_id,
+            'graph_type'=> 'Target_Rate',
+            'p_key'     => $this->request->getPost('p_key'),
+        ];
+        $rules = [
+            'id'     => ['label' => 'Record ID', 'rules' => 'required', 'errors' => ['required' => '{field} Required']],
+            'p_date' => ['label' => 'Date', 'rules' => 'required|valid_date|is_phase_line_date_exist[p_date]', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} is not valid date']],
+            'p_key'  => ['label' => 'Phase Line Key', 'rules' => 'required', 'errors' => ['required' => '{field} Required']],
+        ];
+        if (!$this->validateData($data, $rules)) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => $this->validator->listErrors('custom_list'), 'data' => '']);
+        }
+        $data['p_date']     = stringToDate($data['p_date'], 'Y-m-d');
+        $data['updated_by'] = auth()->user()->id;
+        $model  = model(PhaseLineModel::class);
+        $entity = new PhaseLine();
+        $entity->fill($data);
+        $model->save($entity);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => '', 'message' => 'Record updated successfully', 'data' => $model->single($data['id'])]);
+    }
+
+    public function graphsRatePhaselineDelete(string $encodedClientId)
+    {
+        $id = $this->request->getPost('id');
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => 'Record ID Required', 'data' => '']);
+        }
+        $model  = model(PhaseLineModel::class);
+        $result = $model->delete($id);
+
+        return $this->response->setJSON($result
+            ? ['status' => 'success', 'statusText' => '', 'message' => 'Record deleted successfully', 'data' => '']
+            : ['status' => 'error', 'statusText' => '', 'message' => 'Contact system administrator', 'data' => '']);
+    }
+
+    public function graphsRateTargetMonthsList(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $model     = model(TargetMonthModel::class);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => 'List', 'data' => $model->list($client_id)]);
+    }
+
+    public function graphsRateTargetMonthsCreate(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $data = [
+            't_date'    => $this->request->getPost('t_date'),
+            'client_id' => $client_id,
+            'graph_type'=> $this->request->getPost('graph_type'),
+        ];
+        $rules = [
+            't_date'    => ['label' => 'Date', 'rules' => 'required|valid_date|is_target_date_exist[t_date]', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} is not valid date']],
+            'graph_type'=> ['label' => 'Graph Type', 'rules' => 'required', 'errors' => ['required' => '{field} Required']],
+        ];
+        if (!$this->validateData($data, $rules)) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => $this->validator->listErrors('custom_list'), 'data' => '']);
+        }
+        $data['t_date']     = stringToDate($data['t_date'], 'Y-m-d');
+        $data['created_by'] = auth()->user()->id;
+        $model  = model(TargetMonthModel::class);
+        $entity = new TargetMonth();
+        $entity->fill($data);
+        $model->save($entity);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => '', 'message' => 'Record created successfully', 'data' => $model->single($model->getInsertID())]);
+    }
+
+    public function graphsRateTargetMonthsGetSelected(string $encodedClientId)
+    {
+        $id = $this->request->getPost('id');
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => 'Record ID Required', 'data' => '']);
+        }
+        $model   = model(TargetMonthModel::class);
+        $rowData = $model->find($id);
+        $t_date  = new \DateTime($rowData->t_date);
+        $rowData->t_date = $t_date->format('M-Y');
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => '', 'data' => $rowData]);
+    }
+
+    public function graphsRateTargetMonthsUpdate(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $data = [
+            'id'        => $this->request->getPost('id'),
+            't_date'    => $this->request->getPost('t_date'),
+            'client_id' => $client_id,
+            'graph_type'=> $this->request->getPost('graph_type'),
+        ];
+        $rules = [
+            'id'        => ['label' => 'Record ID', 'rules' => 'required', 'errors' => ['required' => '{field} Required']],
+            't_date'    => ['label' => 'Date', 'rules' => 'required|valid_date|is_target_date_exist[t_date]', 'errors' => ['required' => '{field} Required', 'valid_date' => '{field} is not valid date']],
+            'graph_type'=> ['label' => 'Graph Type', 'rules' => 'required', 'errors' => ['required' => '{field} Required']],
+        ];
+        if (!$this->validateData($data, $rules)) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => $this->validator->listErrors('custom_list'), 'data' => '']);
+        }
+        $data['t_date']     = stringToDate($data['t_date'], 'Y-m-d');
+        $data['updated_by'] = auth()->user()->id;
+        $model  = model(TargetMonthModel::class);
+        $entity = new TargetMonth();
+        $entity->fill($data);
+        $model->save($entity);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => '', 'message' => 'Record updated successfully', 'data' => $model->single($data['id'])]);
+    }
+
+    public function graphsRateTargetMonthsDelete(string $encodedClientId)
+    {
+        $id = $this->request->getPost('id');
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'statusText' => 'Error', 'message' => 'Record ID Required', 'data' => '']);
+        }
+        $model  = model(TargetMonthModel::class);
+        $result = $model->delete($id);
+
+        return $this->response->setJSON($result
+            ? ['status' => 'success', 'statusText' => '', 'message' => 'Record deleted successfully', 'data' => '']
+            : ['status' => 'error', 'statusText' => '', 'message' => 'Contact system administrator', 'data' => '']);
+    }
+
+    public function graphsStimulusResponseChainData(string $encodedClientId)
+    {
+        $client_id = decodeValue($encodedClientId);
+        $domain_id = $this->request->getPost('domain_id');
+        $goal_id   = $this->request->getPost('goal_id');
+        $target_id = $this->request->getPost('target_id');
+
+        $rules = [
+            'domain_id' => ['label' => 'Domain', 'rules' => 'required|integer', 'errors' => ['required' => '{field} Required', 'integer' => '{field} must be a valid selection']],
+            'goal_id'   => ['label' => 'Goal', 'rules' => 'required|integer', 'errors' => ['required' => '{field} Required', 'integer' => '{field} must be a valid selection']],
+            'target_id' => ['label' => 'Target', 'rules' => 'permit_empty|integer', 'errors' => ['integer' => '{field} must be a valid selection']],
+        ];
+        $data = ['domain_id' => $domain_id, 'goal_id' => $goal_id, 'target_id' => $target_id];
+        if (!$this->validateData($data, $rules)) {
+            return $this->response->setJSON(['status' => 'validation_error', 'statusText' => 'Error', 'message' => $this->validator->getErrors(), 'data' => '']);
+        }
+
+        $clientId  = (int) $client_id;
+        $domainId  = (int) $domain_id;
+        $goalId    = (int) $goal_id;
+        $targetId  = ($target_id === '' || $target_id === null) ? null : (int) $target_id;
+
+        $model              = model(StimulusResponseChainGraphsModel::class);
+        $graphs             = $model->getGraphsData($clientId, $domainId, $goalId, $targetId);
+        $client             = $this->clientModel->getClientById($clientId);
+        $clientActiveProgram = $this->clientModel->clientActiveProgram($clientId);
+
+        return $this->response->setJSON(['status' => 'success', 'statusText' => 'Success', 'message' => empty($graphs['targets']) ? 'No stimulus response chain graph data found.' : 'List', 'data' => $graphs, 'client' => $client, 'clientActiveProgram' => $clientActiveProgram]);
+    }
+
+    public function graphsStimulusResponseChainDomains(string $encodedClientId)
+    {
+        $client_id = (int) decodeValue($encodedClientId);
+        if ($client_id <= 0) {
+            return $this->response->setJSON([]);
+        }
+        $model = model(StimulusResponseChainGraphsModel::class);
+
+        return $this->response->setJSON($model->getClientDomains($client_id));
+    }
+
+    public function graphsStimulusResponseChainDomainGoals(string $encodedClientId)
+    {
+        $client_id = (int) decodeValue($encodedClientId);
+        $domain_id = (int) $this->request->getPost('domain_id');
+        if ($client_id <= 0 || $domain_id <= 0) {
+            return $this->response->setJSON([]);
+        }
+        $model = model(StimulusResponseChainGraphsModel::class);
+
+        return $this->response->setJSON($model->getClientDomainGoals($client_id, $domain_id));
+    }
+
+    public function graphsStimulusResponseChainGoalTargets(string $encodedClientId)
+    {
+        $client_id = (int) decodeValue($encodedClientId);
+        $goal_id   = (int) $this->request->getPost('goal_id');
+        if ($client_id <= 0 || $goal_id <= 0) {
+            return $this->response->setJSON([]);
+        }
+        $model = model(StimulusResponseChainGraphsModel::class);
+
+        return $this->response->setJSON($model->getClientGoalTargets($client_id, $goal_id));
+    }
+
     public function dailyReport($encodedClientId)
     {
         $this->page_title = 'Client Profile | Daily Report';
@@ -1329,9 +1808,10 @@ class ClientProfileController extends AdminController
         return view('ClientProfile/Reports/daily', array_merge(
             $this->getCommonClientData($encodedClientId),
             [
-                'mtab'  => $mtab,
-                'client' => $client,
-                'page_title' => $this->page_title,
+                'mtab'           => $mtab,
+                'client'         => $client,
+                'encodedClientId' => $encodedClientId,
+                'page_title'     => $this->page_title,
             ]
         ));
     }
@@ -1380,22 +1860,19 @@ class ClientProfileController extends AdminController
         $rows = [];
         foreach (($result['data'] ?? []) as $row) {
             $latestStatus = strtoupper((string) ($row['latest_status'] ?? 'DRAFT'));
-            if ($latestStatus !== 'FINAL') {
-                continue;
-            }
 
             $rows[] = [
-                'report_id' => (int) ($row['report_id'] ?? 0),
-                'period_from' => (string) ($row['period_start'] ?? ''),
-                'period_to' => (string) ($row['period_end'] ?? ''),
+                'report_id'          => (int) ($row['report_id'] ?? 0),
+                'period_from'        => (string) ($row['period_start'] ?? ''),
+                'period_to'          => (string) ($row['period_end'] ?? ''),
                 'period_from_display' => !empty($row['period_start']) ? app_date($row['period_start']) : '',
-                'period_to_display' => !empty($row['period_end']) ? app_date($row['period_end']) : '',
-                'latest_version_no' => (int) ($row['latest_version_no'] ?? 0),
-                'latest_version_id' => isset($row['latest_version_id']) ? (int) $row['latest_version_id'] : null,
-                'latest_status' => $latestStatus,
-                'created_at' => $row['created_at'] ?? null,
+                'period_to_display'  => !empty($row['period_end']) ? app_date($row['period_end']) : '',
+                'latest_version_no'  => (int) ($row['latest_version_no'] ?? 0),
+                'latest_version_id'  => isset($row['latest_version_id']) ? (int) $row['latest_version_id'] : null,
+                'latest_status'      => $latestStatus,
+                'created_at'         => $row['created_at'] ?? null,
                 'created_at_display' => !empty($row['created_at']) ? app_date($row['created_at'], true) : '',
-                'updated_at' => $row['updated_at'] ?? null,
+                'updated_at'         => $row['updated_at'] ?? null,
                 'updated_at_display' => !empty($row['updated_at']) ? app_date($row['updated_at'], true) : '',
             ];
         }
@@ -1955,4 +2432,1136 @@ class ClientProfileController extends AdminController
             ]
         ));
     } */
+
+    /******************************************************************** */
+    // Phase 4: Daily Report Lifecycle (profile-owned)
+    /******************************************************************** */
+
+    public function dailyReportData(string $encodedClientId)
+    {
+        helper('custom');
+
+        $clientId = (int) decodeValue($encodedClientId);
+        $client = $this->clientModel->getClientById($clientId);
+        if (!$client) {
+            $response = $this->getResponseObject('error', 'NotFound', 'Client not found.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $queryModel = new DailyReportQueryModel();
+        $rows = $queryModel->listBySubject($clientId, null, null);
+        $data = [];
+        foreach ($rows as $row) {
+            $emailStatus = $row['email_status'] ?? ReportEmailStatus::NOT_SENT;
+            $latestStatus = strtoupper(trim((string) ($row['latest_status'] ?? 'FINAL')));
+            if ($latestStatus === '') {
+                $latestStatus = 'FINAL';
+            }
+
+            $data[] = [
+                'report_id'            => (int) ($row['report_id'] ?? 0),
+                'subject_id'           => (int) ($row['subject_id'] ?? 0),
+                'internal_mrn'         => $row['internal_mrn'] ?? '',
+                'learner_name'         => trim((string) ($row['learner_name'] ?? '')),
+                'report_date'          => $row['report_date'] ?? '',
+                'report_date_display'  => !empty($row['report_date']) ? app_date($row['report_date']) : '',
+                'latest_version_no'    => (int) ($row['latest_version_no'] ?? 0),
+                'latest_version_id'    => isset($row['version_id']) ? (int) $row['version_id'] : null,
+                'latest_artifact_id'   => isset($row['latest_artifact_id']) ? (int) $row['latest_artifact_id'] : null,
+                'latest_status'        => $latestStatus,
+                'generated_at'         => $row['generated_at'] ?? null,
+                'generated_at_display' => !empty($row['generated_at']) ? app_date($row['generated_at'], true) : '',
+                'generated_by_name'    => trim((string) ($row['generated_by_name'] ?? '')),
+                'email_status'         => $emailStatus,
+                'email_status_label'   => ReportEmailStatus::label($emailStatus),
+                'email_sent_at'        => $row['email_sent_at'] ?? null,
+                'email_action_by_name' => trim((string) ($row['email_action_by_name'] ?? '')),
+            ];
+        }
+
+        $response = $this->getResponseObject('success', 'DailyReports', 'Listed successfully', [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportCheckGenerate(string $encodedClientId)
+    {
+        $clientId = (int) decodeValue($encodedClientId);
+        $reportDate = trim((string) $this->request->getPost('report_date'));
+
+        if ($clientId <= 0 || !$this->isValidYmd($reportDate)) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Valid report_date is required.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $result = $this->dailyReportService->checkGenerateDraft($clientId, $reportDate);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'NO_SESSION' => 'NoSession',
+                'ACTIVE_DRAFT_EXISTS' => 'ActiveDraftExists',
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'TEMPLATE_SETUP_REQUIRED' => 'TemplateSetupRequired',
+                default => 'Validation_Error',
+            };
+            $data = $result['data'] ?? [];
+            $draftVersionId = (int) ($data['version_id'] ?? 0);
+            if ($draftVersionId > 0) {
+                $data['draft_url'] = base_url('client-profile/reports/daily/' . $encodedClientId . '/version/' . $draftVersionId . '/draft');
+            }
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $data);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'GenerateCheck', $result['message'], [], $result['data'] ?? []);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportGenerate(string $encodedClientId)
+    {
+        $clientId = (int) decodeValue($encodedClientId);
+        $reportDate = trim((string) $this->request->getPost('report_date'));
+
+        if ($clientId <= 0 || !$this->isValidYmd($reportDate)) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Valid report_date is required.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $result = $this->dailyReportService->createDraft($clientId, $reportDate, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'NO_SESSION' => 'NoSession',
+                'ACTIVE_DRAFT_EXISTS' => 'ActiveDraftExists',
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'TEMPLATE_SETUP_REQUIRED' => 'TemplateSetupRequired',
+                default => 'DailyReport',
+            };
+            $data = $result['data'] ?? [];
+            $draftVersionId = (int) ($data['version_id'] ?? 0);
+            if ($draftVersionId > 0) {
+                $data['draft_url'] = base_url('client-profile/reports/daily/' . $encodedClientId . '/version/' . $draftVersionId . '/draft');
+            }
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $data);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $versionId = (int) ($data['version_id'] ?? 0);
+        $data['draft_url'] = $versionId > 0 ? base_url('client-profile/reports/daily/' . $encodedClientId . '/version/' . $versionId . '/draft') : null;
+        $response = $this->getResponseObject('success', 'DailyReport', 'Draft generated successfully.', [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportVersions(string $encodedClientId)
+    {
+        helper('custom');
+
+        $reportId = (int) $this->request->getPost('report_id');
+        if ($reportId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'report_id is required.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $queryModel = new DailyReportQueryModel();
+        $rows = $queryModel->listVersionsByReportId($reportId);
+        $data = [];
+        foreach ($rows as $row) {
+            $emailStatus = $row['email_status'] ?? ReportEmailStatus::NOT_SENT;
+            $status = strtoupper(trim((string) ($row['status'] ?? 'FINAL')));
+            if ($status === '') {
+                $status = 'FINAL';
+            }
+
+            $data[] = [
+                'version_id'           => (int) ($row['version_id'] ?? 0),
+                'version_no'           => (int) ($row['version_no'] ?? 0),
+                'status'               => $status,
+                'generated_at'         => $row['generated_at'] ?? null,
+                'generated_at_display' => !empty($row['generated_at']) ? app_date($row['generated_at'], true) : '',
+                'generated_by_name'    => trim((string) ($row['generated_by_name'] ?? '')),
+                'artifact_id'          => isset($row['artifact_id']) ? (int) $row['artifact_id'] : null,
+                'file_name'            => (string) ($row['file_name'] ?? ''),
+                'email_status'         => $emailStatus,
+                'email_status_label'   => ReportEmailStatus::label($emailStatus),
+                'email_sent_at'        => $row['email_sent_at'] ?? null,
+                'email_action_by_name' => trim((string) ($row['email_action_by_name'] ?? '')),
+            ];
+        }
+
+        $response = $this->getResponseObject('success', 'DailyReportVersions', 'Listed successfully.', [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportDraft(string $encodedClientId, int $versionId)
+    {
+        helper('custom');
+
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            throw new PageNotFoundException('Invalid version id');
+        }
+
+        $version = $this->dailyReportService->getVersionContext($versionId);
+        if (!$version) {
+            throw new PageNotFoundException('Daily Report draft not found.');
+        }
+
+        $workflowStatus = strtoupper(trim((string) ($version['workflow_status'] ?? 'FINAL')));
+        if ($workflowStatus === '' || $workflowStatus === 'FINAL') {
+            return redirect()->to(base_url('client-profile/reports/daily/' . $encodedClientId . '/version/' . $versionId . '/pdf'));
+        }
+
+        $manualData = $this->decodeJsonObjectCp((string) ($version['manual_json'] ?? '{}'));
+        $snapshot = $this->decodeJsonObjectCp((string) ($version['snapshot_json'] ?? '{}'));
+        $sectionStatus = $this->decodeJsonObjectCp((string) ($version['section_status_json'] ?? '{}'));
+        $dailySectionData = [];
+        if (isset($snapshot['sections']['daily_content']['data']) && is_array($snapshot['sections']['daily_content']['data'])) {
+            $dailySectionData = $snapshot['sections']['daily_content']['data'];
+        }
+
+        $this->page_title = 'Client Profile | Daily Report Draft';
+
+        return view('ClientProfile/Reports/Daily/draft', [
+            'page_title'         => $this->page_title,
+            'version'            => $version,
+            'manual_data'        => $manualData,
+            'draft_section_data' => $dailySectionData,
+            'section_status'     => $sectionStatus,
+            'daily_image_limits' => $this->dailyReportService->getDailyImageLimits(),
+            'encodedClientId'    => $encodedClientId,
+            'daily_list_url'     => base_url('client-profile/reports/daily/' . $encodedClientId),
+        ]);
+    }
+
+    public function dailyReportSaveDraft(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $manualData = [];
+        $manualJson = trim((string) $this->request->getPost('manual_json'));
+        if ($manualJson !== '') {
+            $decoded = json_decode($manualJson, true);
+            if (!is_array($decoded)) {
+                $response = $this->getResponseObject('error', 'Validation_Error', 'manual_json must be valid JSON object.', [], []);
+                return $this->response->setJSON($response);
+            }
+            $manualData = $decoded;
+        }
+
+        $result = $this->dailyReportService->saveDraft($versionId, $manualData, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'NOT_FOUND' => 'NotFound',
+                default => 'DailyReport',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'DailyReport', $result['message'], [], $result['data'] ?? []);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportPullSection(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $sectionKey = trim((string) $this->request->getPost('section_key'));
+        if ($sectionKey === '') {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'section_key is required.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $result = $this->dailyReportService->pullSectionData($versionId, $sectionKey, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'DailyReport',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'DailyReport', $result['message'], [], $result['data'] ?? []);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportImages(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $result = $this->dailyReportService->listDailyImages($versionId);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'DailyReport',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $data['images'] = $this->decorateDailyImagesProfile($encodedClientId, $versionId, is_array($data['images'] ?? null) ? $data['images'] : []);
+        $response = $this->getResponseObject('success', 'DailyReport', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportUploadImages(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $files = $this->request->getFileMultiple('images');
+        if (!is_array($files) || empty($files)) {
+            $single = $this->request->getFile('images');
+            $files = $single ? [$single] : [];
+        }
+
+        $result = $this->dailyReportService->uploadDailyImages($versionId, $files, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'DailyReport',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $data['images'] = $this->decorateDailyImagesProfile($encodedClientId, $versionId, is_array($data['images'] ?? null) ? $data['images'] : []);
+        $response = $this->getResponseObject('success', 'DailyReport', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportDeleteImage(string $encodedClientId, int $versionId, int $artifactId)
+    {
+        $versionId = (int) $versionId;
+        $artifactId = (int) $artifactId;
+        if ($versionId <= 0 || $artifactId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version or image id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $result = $this->dailyReportService->deleteDailyImage($versionId, $artifactId, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'DailyReport',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $data['images'] = $this->decorateDailyImagesProfile($encodedClientId, $versionId, is_array($data['images'] ?? null) ? $data['images'] : []);
+        $response = $this->getResponseObject('success', 'DailyReport', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportReplaceImage(string $encodedClientId, int $versionId, int $artifactId)
+    {
+        $versionId = (int) $versionId;
+        $artifactId = (int) $artifactId;
+        if ($versionId <= 0 || $artifactId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version or image id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $file = $this->request->getFile('image');
+        if (!$file) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Image file is required.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $result = $this->dailyReportService->replaceDailyImage($versionId, $artifactId, $file, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'DailyReport',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $data['images'] = $this->decorateDailyImagesProfile($encodedClientId, $versionId, is_array($data['images'] ?? null) ? $data['images'] : []);
+        $response = $this->getResponseObject('success', 'DailyReport', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportViewImage(string $encodedClientId, int $versionId, int $artifactId)
+    {
+        $versionId = (int) $versionId;
+        $artifactId = (int) $artifactId;
+        if ($versionId <= 0 || $artifactId <= 0) {
+            throw new PageNotFoundException('Invalid image reference.');
+        }
+
+        $artifact = $this->dailyReportService->getDailyImageArtifact($versionId, $artifactId);
+        if (!$artifact) {
+            throw new PageNotFoundException('Daily image not found.');
+        }
+
+        $storagePath = trim((string) ($artifact['storage_path'] ?? ''));
+        $mimeType = trim((string) ($artifact['mime_type'] ?? 'application/octet-stream'));
+        if ($storagePath === '') {
+            throw new PageNotFoundException('Daily image path missing.');
+        }
+
+        $fullPath = WRITEPATH . str_replace('/', DIRECTORY_SEPARATOR, ltrim($storagePath, '/'));
+        if (!is_file($fullPath)) {
+            throw new PageNotFoundException('Daily image file not found.');
+        }
+
+        $content = file_get_contents($fullPath);
+        if ($content === false) {
+            throw new \RuntimeException('Unable to read daily image file.');
+        }
+
+        return $this->response
+            ->setHeader('Content-Type', $mimeType)
+            ->setHeader('Cache-Control', 'private, max-age=300')
+            ->setBody($content);
+    }
+
+    public function dailyReportFinalize(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $result = $this->dailyReportService->finalizeDraft($versionId, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'TEMPLATE_SETUP_REQUIRED' => 'TemplateSetupRequired',
+                'TEMPLATE_FILE_MISSING' => 'TemplateFileMissing',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'FINALIZE_VALIDATION_ERROR' => 'DailyReport',
+                'NOT_FOUND' => 'NotFound',
+                default => 'DailyReport',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $data['pdf_url'] = base_url('client-profile/reports/daily/' . $encodedClientId . '/version/' . $versionId . '/pdf');
+        $response = $this->getResponseObject('success', 'DailyReport', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportRegenerate(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $result = $this->dailyReportService->regenerateDraft($versionId, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'TEMPLATE_SETUP_REQUIRED' => 'TemplateSetupRequired',
+                'ACTIVE_DRAFT_EXISTS' => 'ActiveDraftExists',
+                'NOT_FINAL' => 'NotFinal',
+                'NOT_FOUND' => 'NotFound',
+                default => 'DailyReport',
+            };
+            $data = $result['data'] ?? [];
+            $draftVersionId = (int) ($data['version_id'] ?? 0);
+            if ($draftVersionId > 0) {
+                $data['draft_url'] = base_url('client-profile/reports/daily/' . $encodedClientId . '/version/' . $draftVersionId . '/draft');
+            }
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $data);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $newVersionId = (int) ($data['version_id'] ?? 0);
+        $data['draft_url'] = $newVersionId > 0 ? base_url('client-profile/reports/daily/' . $encodedClientId . '/version/' . $newVersionId . '/draft') : null;
+        $response = $this->getResponseObject('success', 'DailyReport', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportDeleteVersion(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $result = $this->dailyReportService->deleteLatestVersion($versionId, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'NOT_FOUND' => 'NotFound',
+                'NOT_LATEST' => 'NotLatestVersion',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'DailyReport',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'DailyReport', $result['message'], [], $result['data'] ?? []);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportDeleteAll(string $encodedClientId, int $reportId)
+    {
+        $reportId = (int) $reportId;
+        if ($reportId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid report id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $result = $this->dailyReportService->deleteAllVersions($reportId, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'DailyReport',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'DailyReport', $result['message'], [], $result['data'] ?? []);
+        return $this->response->setJSON($response);
+    }
+
+    public function dailyReportPdf(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            throw new PageNotFoundException('Invalid version id');
+        }
+
+        $queryModel = new DailyReportQueryModel();
+        $artifact = $queryModel->getLatestPdfArtifactByVersion($versionId);
+        if (!$artifact) {
+            throw new PageNotFoundException('PDF artifact not found.');
+        }
+
+        $fullPath = $this->dailyReportService->resolvePdfPathForDownload($versionId, $artifact);
+        if ($fullPath === null || !is_file($fullPath)) {
+            throw new PageNotFoundException('PDF file not found.');
+        }
+
+        return $this->response->download($fullPath, null)->setFileName((string) ($artifact['file_name'] ?? 'daily-report.pdf'));
+    }
+
+    public function dailyReportSend(string $encodedClientId)
+    {
+        $versionId = (int) $this->request->getPost('version_id');
+        $toEmail = trim((string) $this->request->getPost('to_email'));
+        $ccEmail = trim((string) $this->request->getPost('cc_email'));
+
+        if ($versionId <= 0 || $toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'version_id and valid to_email are required.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $service = new DailyReportEmailService();
+        $result = $service->send($versionId, $toEmail, $ccEmail, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $response = $this->getResponseObject('error', 'DailyReportEmail', $result['message'], [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'DailyReportEmail', 'Email request logged successfully.', [], $result['data']);
+        return $this->response->setJSON($response);
+    }
+
+    /******************************************************************** */
+    // Phase 4: Progress Report Lifecycle (profile-owned, additional)
+    /******************************************************************** */
+
+    public function progressReportCheckGenerate(string $encodedClientId)
+    {
+        $clientId = (int) decodeValue($encodedClientId);
+        $periodFrom = trim((string) $this->request->getPost('period_from'));
+        $periodTo = trim((string) $this->request->getPost('period_to'));
+
+        if ($clientId <= 0 || !$this->isValidYmd($periodFrom) || !$this->isValidYmd($periodTo)) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'period_from and period_to are required.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->checkGenerateDraft($clientId, $periodFrom, $periodTo);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'EXACT_PERIOD_EXISTS' => 'ExactPeriodExists',
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'TEMPLATE_SETUP_REQUIRED' => 'TemplateSetupRequired',
+                default => 'Validation_Error',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'GenerateCheck', $result['message'], [], $result['data'] ?? []);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportGenerate(string $encodedClientId)
+    {
+        $clientId = (int) decodeValue($encodedClientId);
+        $periodFrom = trim((string) $this->request->getPost('period_from'));
+        $periodTo = trim((string) $this->request->getPost('period_to'));
+
+        if ($clientId <= 0 || !$this->isValidYmd($periodFrom) || !$this->isValidYmd($periodTo)) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'period_from and period_to are required.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->createDraft($clientId, $periodFrom, $periodTo, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'EXACT_PERIOD_EXISTS' => 'ExactPeriodExists',
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'TEMPLATE_SETUP_REQUIRED' => 'TemplateSetupRequired',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $versionId = (int) ($data['version_id'] ?? 0);
+        $data['draft_url'] = $versionId > 0 ? base_url('client-profile/reports/progress/' . $encodedClientId . '/version/' . $versionId . '/draft') : null;
+        $response = $this->getResponseObject('success', 'Progress Report', 'Draft generated successfully.', [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportDraft(string $encodedClientId, int $versionId)
+    {
+        helper('custom');
+
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            throw new PageNotFoundException('Invalid version id');
+        }
+
+        $progressService = new ProgressReportService();
+        $version = $progressService->getVersionContext($versionId);
+        if (!$version) {
+            throw new PageNotFoundException('Progress Report draft not found.');
+        }
+
+        $workflowStatus = strtoupper((string) ($version['workflow_status'] ?? 'DRAFT'));
+        if ($workflowStatus === 'FINAL') {
+            return redirect()->to(base_url('client-profile/reports/progress/version/' . $encodedClientId . '/' . $versionId . '/pdf'));
+        }
+
+        $this->page_title = 'Client Profile | Progress Report Draft';
+
+        return view('ClientProfile/Reports/Progress/draft', [
+            'page_title'                  => $this->page_title,
+            'version'                     => $version,
+            'manual_data'                 => $this->decodeJsonObjectCp((string) ($version['manual_json'] ?? '{}')),
+            'instructional_image_limits'  => $progressService->getInstructionalImageLimits(),
+            'encodedClientId'             => $encodedClientId,
+            'progress_list_url'           => base_url('client-profile/reports/progress/' . $encodedClientId),
+        ]);
+    }
+
+    public function progressReportSaveDraft(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $manualData = [
+            'approved_by' => trim((string) $this->request->getPost('approved_by')),
+            'draft_notes' => trim((string) $this->request->getPost('draft_notes')),
+        ];
+
+        $manualJson = trim((string) $this->request->getPost('manual_json'));
+        if ($manualJson !== '') {
+            $decoded = json_decode($manualJson, true);
+            if (!is_array($decoded)) {
+                $response = $this->getResponseObject('error', 'Validation_Error', 'manual_json must be valid JSON object.', [], []);
+                return $this->response->setJSON($response);
+            }
+            $manualData = array_merge($manualData, $decoded);
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->saveDraft($versionId, $manualData, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'NOT_FOUND' => 'NotFound',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'Progress Report', $result['message'], [], $result['data'] ?? []);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportPullSection(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $sectionKey = trim((string) $this->request->getPost('section_key'));
+        if ($sectionKey === '') {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'section_key is required.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->pullSectionData($versionId, $sectionKey, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'Progress Report', $result['message'], [], $result['data'] ?? []);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportUpdateSectionState(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $sectionKey = trim((string) $this->request->getPost('section_key'));
+        if ($sectionKey === '') {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'section_key is required.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $sectionDataJson = trim((string) $this->request->getPost('section_data_json'));
+        if ($sectionDataJson === '') {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'section_data_json is required.', [], []);
+            return $this->response->setJSON($response);
+        }
+        $sectionData = json_decode($sectionDataJson, true);
+        if (!is_array($sectionData)) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'section_data_json must be valid JSON object.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $pulledAt = trim((string) $this->request->getPost('pulled_at'));
+        $manualPatch = [];
+
+        $instructionalDomainCommentsJson = trim((string) $this->request->getPost('instructional_domain_comments_json'));
+        if ($instructionalDomainCommentsJson !== '') {
+            $instructionalDomainComments = json_decode($instructionalDomainCommentsJson, true);
+            if (!is_array($instructionalDomainComments)) {
+                $response = $this->getResponseObject('error', 'Validation_Error', 'instructional_domain_comments_json must be valid JSON object.', [], []);
+                return $this->response->setJSON($response);
+            }
+            $manualPatch['instructional_programmes_domain_comments'] = $instructionalDomainComments;
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->updateSectionState(
+            $versionId,
+            $sectionKey,
+            $sectionData,
+            $pulledAt,
+            $manualPatch,
+            auth()->user()->id ?? null
+        );
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'Progress Report', $result['message'], [], $result['data'] ?? []);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportInstructionalImages(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->listInstructionalImages($versionId);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $data['images'] = $this->decorateInstructionalImagesProfile($encodedClientId, $versionId, is_array($data['images'] ?? null) ? $data['images'] : []);
+        $response = $this->getResponseObject('success', 'Progress Report', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportUploadInstructionalImages(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $files = $this->request->getFileMultiple('images');
+        if (!is_array($files) || empty($files)) {
+            $single = $this->request->getFile('images');
+            $files = $single ? [$single] : [];
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->uploadInstructionalImages($versionId, $files, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $data['images'] = $this->decorateInstructionalImagesProfile($encodedClientId, $versionId, is_array($data['images'] ?? null) ? $data['images'] : []);
+        $response = $this->getResponseObject('success', 'Progress Report', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportDeleteInstructionalImage(string $encodedClientId, int $versionId, int $artifactId)
+    {
+        $versionId = (int) $versionId;
+        $artifactId = (int) $artifactId;
+        if ($versionId <= 0 || $artifactId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version or image id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->deleteInstructionalImage($versionId, $artifactId, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $data['images'] = $this->decorateInstructionalImagesProfile($encodedClientId, $versionId, is_array($data['images'] ?? null) ? $data['images'] : []);
+        $response = $this->getResponseObject('success', 'Progress Report', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportReplaceInstructionalImage(string $encodedClientId, int $versionId, int $artifactId)
+    {
+        $versionId = (int) $versionId;
+        $artifactId = (int) $artifactId;
+        if ($versionId <= 0 || $artifactId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version or image id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $file = $this->request->getFile('image');
+        if (!$file) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Image file is required.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->replaceInstructionalImage($versionId, $artifactId, $file, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $data['images'] = $this->decorateInstructionalImagesProfile($encodedClientId, $versionId, is_array($data['images'] ?? null) ? $data['images'] : []);
+        $response = $this->getResponseObject('success', 'Progress Report', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportViewInstructionalImage(string $encodedClientId, int $versionId, int $artifactId)
+    {
+        $versionId = (int) $versionId;
+        $artifactId = (int) $artifactId;
+        if ($versionId <= 0 || $artifactId <= 0) {
+            throw new PageNotFoundException('Invalid image reference.');
+        }
+
+        $progressService = new ProgressReportService();
+        $artifact = $progressService->getInstructionalImageArtifact($versionId, $artifactId);
+        if (!$artifact) {
+            throw new PageNotFoundException('Instructional image not found.');
+        }
+
+        $storagePath = trim((string) ($artifact['storage_path'] ?? ''));
+        $mimeType = trim((string) ($artifact['mime_type'] ?? 'application/octet-stream'));
+        if ($storagePath === '') {
+            throw new PageNotFoundException('Instructional image path missing.');
+        }
+
+        $fullPath = WRITEPATH . str_replace('/', DIRECTORY_SEPARATOR, ltrim($storagePath, '/'));
+        if (!is_file($fullPath)) {
+            throw new PageNotFoundException('Instructional image file not found.');
+        }
+
+        $content = file_get_contents($fullPath);
+        if ($content === false) {
+            throw new \RuntimeException('Unable to read instructional image file.');
+        }
+
+        return $this->response
+            ->setHeader('Content-Type', $mimeType)
+            ->setHeader('Cache-Control', 'private, max-age=300')
+            ->setBody($content);
+    }
+
+    public function progressReportFinalize(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->finalizeDraft($versionId, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'TEMPLATE_SETUP_REQUIRED' => 'TemplateSetupRequired',
+                'TEMPLATE_FILE_MISSING' => 'TemplateFileMissing',
+                'DRAFT_LOCKED' => 'DraftLocked',
+                'FINALIZE_VALIDATION_ERROR' => 'Progress Report',
+                'NOT_FOUND' => 'NotFound',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $data['pdf_url'] = base_url('client-profile/reports/progress/version/' . $encodedClientId . '/' . $versionId . '/pdf');
+        $response = $this->getResponseObject('success', 'Progress Report', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportRegenerate(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->regenerateDraft($versionId, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'TEMPLATE_SETUP_REQUIRED' => 'TemplateSetupRequired',
+                'NOT_FINAL' => 'NotFinal',
+                'NOT_FOUND' => 'NotFound',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $data = $result['data'] ?? [];
+        $newVersionId = (int) ($data['version_id'] ?? 0);
+        $data['draft_url'] = $newVersionId > 0 ? base_url('client-profile/reports/progress/' . $encodedClientId . '/version/' . $newVersionId . '/draft') : null;
+        $response = $this->getResponseObject('success', 'Progress Report', $result['message'], [], $data);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportDeleteVersion(string $encodedClientId, int $versionId)
+    {
+        $versionId = (int) $versionId;
+        if ($versionId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid version id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->deleteLatestVersion($versionId, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'NOT_FOUND' => 'NotFound',
+                'NOT_LATEST' => 'NotLatestVersion',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'Progress Report', $result['message'], [], $result['data'] ?? []);
+        return $this->response->setJSON($response);
+    }
+
+    public function progressReportDeleteAll(string $encodedClientId, int $reportId)
+    {
+        $reportId = (int) $reportId;
+        if ($reportId <= 0) {
+            $response = $this->getResponseObject('error', 'Validation_Error', 'Invalid report id.', [], []);
+            return $this->response->setJSON($response);
+        }
+
+        $progressService = new ProgressReportService();
+        $result = $progressService->deleteAllVersions($reportId, auth()->user()->id ?? null);
+        if (!$result['success']) {
+            $statusText = match ($result['code'] ?? '') {
+                'DB_SETUP_REQUIRED' => 'DbSetupRequired',
+                'NOT_FOUND' => 'NotFound',
+                'VALIDATION_ERROR' => 'Validation_Error',
+                default => 'Progress Report',
+            };
+            $response = $this->getResponseObject('error', $statusText, $result['message'], [], $result['data'] ?? []);
+            return $this->response->setJSON($response);
+        }
+
+        $response = $this->getResponseObject('success', 'Progress Report', $result['message'], [], $result['data'] ?? []);
+        return $this->response->setJSON($response);
+    }
+
+    /******************************************************************** */
+    // Phase 4: Private helpers
+    /******************************************************************** */
+
+    private function isValidYmd(string $date): bool
+    {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return false;
+        }
+        $dt = \DateTime::createFromFormat('Y-m-d', $date);
+        return $dt && $dt->format('Y-m-d') === $date;
+    }
+
+    private function decodeJsonObjectCp(string $json): array
+    {
+        $json = trim($json);
+        if ($json === '') {
+            return [];
+        }
+        $decoded = json_decode($json, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    private function decorateDailyImagesProfile(string $encodedClientId, int $versionId, array $images): array
+    {
+        foreach ($images as &$image) {
+            $artifactId = (int) ($image['artifact_id'] ?? 0);
+            if ($artifactId <= 0) {
+                continue;
+            }
+            $cacheVersion = trim((string) ($image['file_name'] ?? ''));
+            if ($cacheVersion === '') {
+                $cacheVersion = 'artifact-' . $artifactId;
+            }
+            $image['view_url'] = base_url('client-profile/reports/daily/' . $encodedClientId . '/version/' . $versionId . '/images/' . $artifactId . '/view')
+                . '?v=' . rawurlencode($cacheVersion);
+        }
+        unset($image);
+        return $images;
+    }
+
+    private function decorateInstructionalImagesProfile(string $encodedClientId, int $versionId, array $images): array
+    {
+        $decorated = [];
+        foreach ($images as $image) {
+            if (!is_array($image)) {
+                continue;
+            }
+            $artifactId = (int) ($image['artifact_id'] ?? 0);
+            if ($artifactId <= 0) {
+                continue;
+            }
+            $image['view_url'] = base_url('client-profile/reports/progress/' . $encodedClientId . '/version/' . $versionId . '/instructional-images/' . $artifactId . '/view');
+            $decorated[] = $image;
+        }
+        return $decorated;
+    }
 }

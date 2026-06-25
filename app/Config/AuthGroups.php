@@ -84,12 +84,6 @@ class AuthGroups extends ShieldAuthGroups
      * If a permission is not listed here it cannot be used.
      */
     public array $permissions = [
-        // KPI
-        'kpi.access' => 'KPI\'s → Menu Access',
-        'kpi.rate-data.view' => 'KPI → Rate Data View',
-        'kpi.client-target.view' => 'KPI → Client\'s Target View',
-        'kpi.supervisor-target.view' => 'KPI → Supervisor\'s Target View',
-
         // Sessions Menu Access
         'sessions.access' => 'Sessions → Menu Access',
 
@@ -129,36 +123,6 @@ class AuthGroups extends ShieldAuthGroups
         'weekly-data.manual.update' => 'Data → Weekly Data Update',
         'weekly-data.manual.create-no-session' => 'Data → Weekly Data Create (No Session)',
         'weekly-data.manual.delete' => 'Data → Weekly Data Delete',
-
-        // Graphs Menu Access
-        'graphs.access' => 'Graphs → Menu Access',
-
-        // Daily Data Graphs
-        'graphs.daily-data.view' => 'Graphs → Daily Data Graphs View',
-
-        // Cumulative Graphs
-        'graphs.cumulative.view' => 'Graphs → Cumulative Graphs View',
-        'graphs.cumulative.phase-line.view' => 'Graphs → Cumulative Graphs Phase Line View',
-        'graphs.cumulative.phase-line.create' => 'Graphs → Cumulative Graphs Phase Line Create',
-        'graphs.cumulative.phase-line.update' => 'Graphs → Cumulative Graphs Phase Line Update',
-        'graphs.cumulative.phase-line.delete' => 'Graphs → Cumulative Graphs Phase Line Delete',
-
-        // Rate Graphs
-        'graphs.rate.view' => 'Graphs → Rate Graphs View',
-        'graphs.rate.phase-line.view' => 'Graphs → Rate Graphs Phase Line View',
-        'graphs.rate.phase-line.create' => 'Graphs → Rate Graphs Phase Line Create',
-        'graphs.rate.phase-line.update' => 'Graphs → Rate Graphs Phase Line Update',
-        'graphs.rate.phase-line.delete' => 'Graphs → Rate Graphs Phase Line Delete',
-        'graphs.rate.target-months.view' => 'Graphs → Rate Graphs Target Months View',
-        'graphs.rate.target-months.create' => 'Graphs → Rate Graphs Target Months Create',
-        'graphs.rate.target-months.update' => 'Graphs → Rate Graphs Target Months Update',
-        'graphs.rate.target-months.delete' => 'Graphs → Rate Graphs Target Months Delete',
-
-        // Mand Graphs
-        'graphs.mands.view' => 'Graphs → Mands Graphs View',
-        
-        // Stimulus Response Chain Graphs
-        'graphs.stimulus-response-chain.view' => 'Graphs → Stimulus Response Chain Graphs View',
 
         // Client Profile (order matches profile-sidebar.php)
         'client-profile.access' => 'Client Profile → Menu Access',
@@ -216,7 +180,22 @@ class AuthGroups extends ShieldAuthGroups
         // Reports
         'client-profile.reports.access' => 'Client Profile → Reports → Menu Access',
         'client-profile.reports.daily.view' => 'Client Profile → Reports → Session Summary View',
+        'client-profile.reports.daily.generate' => 'Client Profile → Reports → Daily Report Generate Draft',
+        'client-profile.reports.daily.save-draft' => 'Client Profile → Reports → Daily Report Save Draft',
+        'client-profile.reports.daily.pull-section' => 'Client Profile → Reports → Daily Report Pull Section',
+        'client-profile.reports.daily.finalize' => 'Client Profile → Reports → Daily Report Finalize',
+        'client-profile.reports.daily.regenerate' => 'Client Profile → Reports → Daily Report Regenerate',
+        'client-profile.reports.daily.delete-version' => 'Client Profile → Reports → Daily Report Delete Version',
+        'client-profile.reports.daily.delete-all' => 'Client Profile → Reports → Daily Report Delete All Versions',
+        'client-profile.reports.daily.send' => 'Client Profile → Reports → Daily Report Send',
         'client-profile.reports.progress.view' => 'Client Profile → Reports → Progress Report View',
+        'client-profile.reports.progress.generate' => 'Client Profile → Reports → Progress Report Generate Draft',
+        'client-profile.reports.progress.save-draft' => 'Client Profile → Reports → Progress Report Save Draft',
+        'client-profile.reports.progress.pull-section' => 'Client Profile → Reports → Progress Report Pull Section',
+        'client-profile.reports.progress.finalize' => 'Client Profile → Reports → Progress Report Finalize',
+        'client-profile.reports.progress.regenerate' => 'Client Profile → Reports → Progress Report Regenerate',
+        'client-profile.reports.progress.delete-version' => 'Client Profile → Reports → Progress Report Delete Version',
+        'client-profile.reports.progress.delete-all' => 'Client Profile → Reports → Progress Report Delete All Versions',
 
         // Client Configuration Menu Access
         'client-configuration.access' => 'Client Configuration → Menu Access',
@@ -284,26 +263,6 @@ class AuthGroups extends ShieldAuthGroups
         'app-configuration.module-settings.view' => 'MIS Configuration → Module Settings View',
         'app-configuration.module-settings.save' => 'MIS Configuration → Module Settings Update',
 
-        // Reports
-        'reporting.access' => 'Reports → Menu Access',
-        'reporting.daily.view' => 'Reports → Daily Report View',
-        'reporting.daily.generate' => 'Reports → Daily Report Generate Draft',
-        'reporting.daily.save-draft' => 'Reports → Daily Report Save Draft',
-        'reporting.daily.pull-section' => 'Reports → Daily Report Pull Section',
-        'reporting.daily.finalize' => 'Reports → Daily Report Finalize',
-        'reporting.daily.regenerate' => 'Reports → Daily Report Regenerate',
-        'reporting.daily.send' => 'Reports → Daily Report Send',
-        'reporting.daily.delete-version' => 'Reports → Daily Report Delete Version',
-        'reporting.daily.delete-all' => 'Reports → Daily Report Delete All Versions',
-        'reporting.progress.view' => 'Reports → Progress Report View',
-        'reporting.progress.generate' => 'Reports → Progress Report Generate Draft',
-        'reporting.progress.save-draft' => 'Reports → Progress Report Save Draft',
-        'reporting.progress.pull-section' => 'Reports → Progress Report Pull Section',
-        'reporting.progress.finalize' => 'Reports → Progress Report Finalize',
-        'reporting.progress.regenerate' => 'Reports → Progress Report Regenerate',
-        'reporting.progress.view-pdf' => 'Reports → Progress Report View PDF',
-        'reporting.progress.delete-version' => 'Reports → Progress Report Delete Version',
-        'reporting.progress.delete-all' => 'Reports → Progress Report Delete All Versions',
     ];
 
     /**
@@ -328,10 +287,7 @@ class AuthGroups extends ShieldAuthGroups
             'data-sheet.*',
             'daily-data.*',
             'weekly-data.*',
-            'graphs.*',
-            'kpi.*',
             'client-profile.*',
-            'reporting.*',
         ],
         'management' => [],
         'supervisor' => [],

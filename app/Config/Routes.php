@@ -154,6 +154,34 @@ $routes->group('/client-profile', ['namespace' => 'App\Controllers\ClientProfile
         $routes->get('rate/target-months/(:segment)', 'ClientProfileController::graphsRateTargetMonths/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
         $routes->get('mands/(:segment)', 'ClientProfileController::graphsMands/$1', ['filter' => 'permission:client-profile.graphs.mands.view']);
         $routes->get('behaviour-reduction/(:segment)', 'ClientProfileController::graphsProblemBehaviour/$1', ['filter' => 'permission:client-profile.problem-behaviour.graphs.view']);
+
+        // Data endpoints (POST)
+        $routes->post('daily/(:segment)/data', 'ClientProfileController::graphsDailyData/$1', ['filter' => 'permission:client-profile.graphs.daily.view']);
+        $routes->post('mands/(:segment)/data', 'ClientProfileController::graphsMandsData/$1', ['filter' => 'permission:client-profile.graphs.mands.view']);
+        $routes->post('cumulative/(:segment)/data', 'ClientProfileController::graphsCumulativeData/$1', ['filter' => 'permission:client-profile.graphs.cumulative.view']);
+        $routes->post('cumulative/(:segment)/phase-line/list', 'ClientProfileController::graphsCumulativePhaselineList/$1', ['filter' => 'permission:client-profile.graphs.cumulative.view']);
+        $routes->post('cumulative/(:segment)/phase-line/new', 'ClientProfileController::graphsCumulativePhaselineCreate/$1', ['filter' => 'permission:client-profile.graphs.cumulative.view']);
+        $routes->post('cumulative/(:segment)/phase-line/get-selected', 'ClientProfileController::graphsCumulativePhaselineGetSelected/$1', ['filter' => 'permission:client-profile.graphs.cumulative.view']);
+        $routes->post('cumulative/(:segment)/phase-line/update', 'ClientProfileController::graphsCumulativePhaselineUpdate/$1', ['filter' => 'permission:client-profile.graphs.cumulative.view']);
+        $routes->post('cumulative/(:segment)/phase-line/delete', 'ClientProfileController::graphsCumulativePhaselineDelete/$1', ['filter' => 'permission:client-profile.graphs.cumulative.view']);
+        $routes->post('cumulative/(:segment)/domains', 'ClientProfileController::graphsCumulativeDomains/$1', ['filter' => 'permission:client-profile.graphs.cumulative.view']);
+        $routes->post('cumulative/(:segment)/domain-goals', 'ClientProfileController::graphsCumulativeDomainGoals/$1', ['filter' => 'permission:client-profile.graphs.cumulative.view']);
+        $routes->post('cumulative/(:segment)/domains-and-goals', 'ClientProfileController::graphsCumulativeDomainAndGoalData/$1', ['filter' => 'permission:client-profile.graphs.cumulative.view']);
+        $routes->post('rate/(:segment)/data', 'ClientProfileController::graphsRateData/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
+        $routes->post('rate/(:segment)/phase-line/list', 'ClientProfileController::graphsRatePhaselineList/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
+        $routes->post('rate/(:segment)/phase-line/new', 'ClientProfileController::graphsRatePhaselineCreate/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
+        $routes->post('rate/(:segment)/phase-line/get-selected', 'ClientProfileController::graphsRatePhaselineGetSelected/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
+        $routes->post('rate/(:segment)/phase-line/update', 'ClientProfileController::graphsRatePhaselineUpdate/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
+        $routes->post('rate/(:segment)/phase-line/delete', 'ClientProfileController::graphsRatePhaselineDelete/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
+        $routes->post('rate/(:segment)/target-months/list', 'ClientProfileController::graphsRateTargetMonthsList/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
+        $routes->post('rate/(:segment)/target-months/new', 'ClientProfileController::graphsRateTargetMonthsCreate/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
+        $routes->post('rate/(:segment)/target-months/get-selected', 'ClientProfileController::graphsRateTargetMonthsGetSelected/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
+        $routes->post('rate/(:segment)/target-months/update', 'ClientProfileController::graphsRateTargetMonthsUpdate/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
+        $routes->post('rate/(:segment)/target-months/delete', 'ClientProfileController::graphsRateTargetMonthsDelete/$1', ['filter' => 'permission:client-profile.graphs.rate.view']);
+        $routes->post('stimulus-response-chain/(:segment)/data', 'ClientProfileController::graphsStimulusResponseChainData/$1', ['filter' => 'permission:client-profile.graphs.stimulus-response-chain.view']);
+        $routes->post('stimulus-response-chain/(:segment)/domains', 'ClientProfileController::graphsStimulusResponseChainDomains/$1', ['filter' => 'permission:client-profile.graphs.stimulus-response-chain.view']);
+        $routes->post('stimulus-response-chain/(:segment)/domain-goals', 'ClientProfileController::graphsStimulusResponseChainDomainGoals/$1', ['filter' => 'permission:client-profile.graphs.stimulus-response-chain.view']);
+        $routes->post('stimulus-response-chain/(:segment)/goal-targets', 'ClientProfileController::graphsStimulusResponseChainGoalTargets/$1', ['filter' => 'permission:client-profile.graphs.stimulus-response-chain.view']);
     });
 
     $routes->get('reports/daily/(:segment)', 'ClientProfileController::dailyReport/$1', ['filter' => 'permission:client-profile.reports.daily.view']);
@@ -161,6 +189,43 @@ $routes->group('/client-profile', ['namespace' => 'App\Controllers\ClientProfile
     $routes->post('reports/progress/data/(:segment)', 'ClientProfileController::progressReportData/$1', ['filter' => 'permission:client-profile.reports.progress.view']);
     $routes->post('reports/progress/versions/(:segment)', 'ClientProfileController::progressReportVersions/$1', ['filter' => 'permission:client-profile.reports.progress.view']);
     $routes->get('reports/progress/version/(:segment)/(:num)/pdf', 'ClientProfileController::progressReportPdf/$1/$2', ['filter' => 'permission:client-profile.reports.progress.view']);
+
+    // Daily report lifecycle (profile-owned)
+    $routes->post('reports/daily/(:segment)/data', 'ClientProfileController::dailyReportData/$1', ['filter' => 'permission:client-profile.reports.daily.view']);
+    $routes->post('reports/daily/(:segment)/check-generate', 'ClientProfileController::dailyReportCheckGenerate/$1', ['filter' => 'permission:client-profile.reports.daily.generate']);
+    $routes->post('reports/daily/(:segment)/generate', 'ClientProfileController::dailyReportGenerate/$1', ['filter' => 'permission:client-profile.reports.daily.generate']);
+    $routes->post('reports/daily/(:segment)/versions', 'ClientProfileController::dailyReportVersions/$1', ['filter' => 'permission:client-profile.reports.daily.view']);
+    $routes->get('reports/daily/(:segment)/version/(:num)/draft', 'ClientProfileController::dailyReportDraft/$1/$2', ['filter' => 'permission:client-profile.reports.daily.view']);
+    $routes->post('reports/daily/(:segment)/version/(:num)/save-draft', 'ClientProfileController::dailyReportSaveDraft/$1/$2', ['filter' => 'permission:client-profile.reports.daily.save-draft']);
+    $routes->post('reports/daily/(:segment)/version/(:num)/pull-section', 'ClientProfileController::dailyReportPullSection/$1/$2', ['filter' => 'permission:client-profile.reports.daily.pull-section']);
+    $routes->post('reports/daily/(:segment)/version/(:num)/images', 'ClientProfileController::dailyReportImages/$1/$2', ['filter' => 'permission:client-profile.reports.daily.view']);
+    $routes->post('reports/daily/(:segment)/version/(:num)/images/upload', 'ClientProfileController::dailyReportUploadImages/$1/$2', ['filter' => 'permission:client-profile.reports.daily.save-draft']);
+    $routes->post('reports/daily/(:segment)/version/(:num)/images/(:num)/delete', 'ClientProfileController::dailyReportDeleteImage/$1/$2/$3', ['filter' => 'permission:client-profile.reports.daily.save-draft']);
+    $routes->post('reports/daily/(:segment)/version/(:num)/images/(:num)/replace', 'ClientProfileController::dailyReportReplaceImage/$1/$2/$3', ['filter' => 'permission:client-profile.reports.daily.save-draft']);
+    $routes->get('reports/daily/(:segment)/version/(:num)/images/(:num)/view', 'ClientProfileController::dailyReportViewImage/$1/$2/$3', ['filter' => 'permission:client-profile.reports.daily.view']);
+    $routes->post('reports/daily/(:segment)/version/(:num)/finalize', 'ClientProfileController::dailyReportFinalize/$1/$2', ['filter' => 'permission:client-profile.reports.daily.finalize']);
+    $routes->post('reports/daily/(:segment)/version/(:num)/regenerate', 'ClientProfileController::dailyReportRegenerate/$1/$2', ['filter' => 'permission:client-profile.reports.daily.regenerate']);
+    $routes->post('reports/daily/(:segment)/version/(:num)/delete', 'ClientProfileController::dailyReportDeleteVersion/$1/$2', ['filter' => 'permission:client-profile.reports.daily.delete-version']);
+    $routes->post('reports/daily/(:segment)/report/(:num)/delete-all', 'ClientProfileController::dailyReportDeleteAll/$1/$2', ['filter' => 'permission:client-profile.reports.daily.delete-all']);
+    $routes->get('reports/daily/(:segment)/version/(:num)/pdf', 'ClientProfileController::dailyReportPdf/$1/$2', ['filter' => 'permission:client-profile.reports.daily.view']);
+    $routes->post('reports/daily/(:segment)/send', 'ClientProfileController::dailyReportSend/$1', ['filter' => 'permission:client-profile.reports.daily.send']);
+
+    // Progress report lifecycle (profile-owned, additional endpoints)
+    $routes->post('reports/progress/(:segment)/check-generate', 'ClientProfileController::progressReportCheckGenerate/$1', ['filter' => 'permission:client-profile.reports.progress.generate']);
+    $routes->post('reports/progress/(:segment)/generate', 'ClientProfileController::progressReportGenerate/$1', ['filter' => 'permission:client-profile.reports.progress.generate']);
+    $routes->get('reports/progress/(:segment)/version/(:num)/draft', 'ClientProfileController::progressReportDraft/$1/$2', ['filter' => 'permission:client-profile.reports.progress.view']);
+    $routes->post('reports/progress/(:segment)/version/(:num)/save-draft', 'ClientProfileController::progressReportSaveDraft/$1/$2', ['filter' => 'permission:client-profile.reports.progress.save-draft']);
+    $routes->post('reports/progress/(:segment)/version/(:num)/pull-section', 'ClientProfileController::progressReportPullSection/$1/$2', ['filter' => 'permission:client-profile.reports.progress.pull-section']);
+    $routes->post('reports/progress/(:segment)/version/(:num)/update-section-state', 'ClientProfileController::progressReportUpdateSectionState/$1/$2', ['filter' => 'permission:client-profile.reports.progress.save-draft']);
+    $routes->post('reports/progress/(:segment)/version/(:num)/instructional-images', 'ClientProfileController::progressReportInstructionalImages/$1/$2', ['filter' => 'permission:client-profile.reports.progress.view']);
+    $routes->post('reports/progress/(:segment)/version/(:num)/instructional-images/upload', 'ClientProfileController::progressReportUploadInstructionalImages/$1/$2', ['filter' => 'permission:client-profile.reports.progress.save-draft']);
+    $routes->post('reports/progress/(:segment)/version/(:num)/instructional-images/(:num)/delete', 'ClientProfileController::progressReportDeleteInstructionalImage/$1/$2/$3', ['filter' => 'permission:client-profile.reports.progress.save-draft']);
+    $routes->post('reports/progress/(:segment)/version/(:num)/instructional-images/(:num)/replace', 'ClientProfileController::progressReportReplaceInstructionalImage/$1/$2/$3', ['filter' => 'permission:client-profile.reports.progress.save-draft']);
+    $routes->get('reports/progress/(:segment)/version/(:num)/instructional-images/(:num)/view', 'ClientProfileController::progressReportViewInstructionalImage/$1/$2/$3', ['filter' => 'permission:client-profile.reports.progress.view']);
+    $routes->post('reports/progress/(:segment)/version/(:num)/finalize', 'ClientProfileController::progressReportFinalize/$1/$2', ['filter' => 'permission:client-profile.reports.progress.finalize']);
+    $routes->post('reports/progress/(:segment)/version/(:num)/regenerate', 'ClientProfileController::progressReportRegenerate/$1/$2', ['filter' => 'permission:client-profile.reports.progress.regenerate']);
+    $routes->post('reports/progress/(:segment)/version/(:num)/delete', 'ClientProfileController::progressReportDeleteVersion/$1/$2', ['filter' => 'permission:client-profile.reports.progress.delete-version']);
+    $routes->post('reports/progress/(:segment)/report/(:num)/delete-all', 'ClientProfileController::progressReportDeleteAll/$1/$2', ['filter' => 'permission:client-profile.reports.progress.delete-all']);
 });
 
 $routes->group('shared-datasheet', ['namespace' => 'App\Controllers\Shared'], function ($routes) {
@@ -510,75 +575,7 @@ $routes->group('/sessions/weekly', ['namespace' => 'App\Controllers\ClientDailyD
 
 /************************************************************************************************************************************************** */
 
-// Graphs Routes
-$routes->group('/graphs/mands', ['namespace' => 'App\Controllers\ClientGraphs'], static function ($routes) {
-    $routes->get('/', 'MandsGraphsController::index', ['filter' => 'permission:graphs.mands.view']);
-    $routes->post('/', 'MandsGraphsController::graphs_data', ['filter' => 'permission:graphs.mands.view']);
-});
 
-$routes->group('/graphs/stimulus-response-chain', ['namespace' => 'App\Controllers\ClientGraphs'], static function ($routes) {
-    $routes->get('/', 'StimulusResponseChainGraphsController::index', ['filter' => 'permission:graphs.stimulus-response-chain.view']);
-    $routes->post('/', 'StimulusResponseChainGraphsController::graphs_data', ['filter' => 'permission:graphs.stimulus-response-chain.view']);
-    $routes->post('getClientDomains', 'StimulusResponseChainGraphsController::getClientDomains', ['filter' => 'permission:graphs.stimulus-response-chain.view']);
-    $routes->post('getClientDomainGoals', 'StimulusResponseChainGraphsController::getClientDomainGoals', ['filter' => 'permission:graphs.stimulus-response-chain.view']);
-    $routes->post('getClientGoalTargets', 'StimulusResponseChainGraphsController::getClientGoalTargets', ['filter' => 'permission:graphs.stimulus-response-chain.view']);
-});
-
-$routes->group('/graphs/dailyData', ['namespace' => 'App\Controllers\ClientGraphs'], static function ($routes) {
-    $routes->get('/', 'DailyDataGraphsController::index', ['filter' => 'permission:graphs.daily-data.view']);
-    $routes->post('/', 'DailyDataGraphsController::graphs_data', ['filter' => 'permission:graphs.daily-data.view']);
-});
-
-$routes->group('/graphs/cumulative', ['namespace' => 'App\Controllers\ClientGraphs'], static function ($routes) {
-    $routes->get('/', 'CumulativeGraphsController::index', ['filter' => 'permission:graphs.cumulative.view']);
-    $routes->post('/', 'CumulativeGraphsController::graphs_data', ['filter' => 'permission:graphs.cumulative.view']);
-
-    $routes->get('phase-line', 'CumulativeGraphsController::index_phase_line', ['filter' => 'permission:graphs.cumulative.phase-line.view']);
-
-    $routes->post('phase-line/list', 'PhaseLineController::list', ['filter' => 'permission:graphs.cumulative.phase-line.view']);
-    $routes->post('phase-line/new', 'PhaseLineController::create', ['filter' => 'permission:graphs.cumulative.phase-line.create']);
-    $routes->post('phase-line/get-selected', 'PhaseLineController::get_selected', ['filter' => 'permission:graphs.cumulative.phase-line.update']);
-    $routes->post('phase-line/update', 'PhaseLineController::update', ['filter' => 'permission:graphs.cumulative.phase-line.update']);
-    $routes->post('phase-line/delete', 'PhaseLineController::delete', ['filter' => 'permission:graphs.cumulative.phase-line.delete']);
-
-    $routes->get('domains-and-goals', 'CumulativeGraphsController::cumulative_graph_by_domain_and_goal_index', ['filter' => 'permission:graphs.cumulative.view']);
-    $routes->post('domains-and-goals', 'CumulativeGraphsController::cumulative_graph_by_domain_and_goal_data', ['filter' => 'permission:graphs.cumulative.view']);
-    $routes->post('getClientDomains', 'CumulativeGraphsController::getClientDomains', ['filter' => 'permission:graphs.cumulative.view']);
-    $routes->post('getClientDomainGoals', 'CumulativeGraphsController::getClientDomainGoals', ['filter' => 'permission:graphs.cumulative.view']);
-});
-
-$routes->group('/graphs/rate', ['namespace' => 'App\Controllers\ClientGraphs'], static function ($routes) {
-    $routes->get('/', 'RateGraphsController::index', ['filter' => 'permission:graphs.rate.view']);
-    $routes->post('/', 'RateGraphsController::graphs_data', ['filter' => 'permission:graphs.rate.view']);
-
-    $routes->get('phase-line', 'RateGraphsController::index_phase_line', ['filter' => 'permission:graphs.rate.phase-line.view']);
-
-    $routes->post('phase-line/list', 'PhaseLineController::list', ['filter' => 'permission:graphs.rate.phase-line.view']);
-    $routes->post('phase-line/new', 'PhaseLineController::create', ['filter' => 'permission:graphs.rate.phase-line.create']);
-    $routes->post('phase-line/get-selected', 'PhaseLineController::get_selected', ['filter' => 'permission:graphs.rate.phase-line.update']);
-    $routes->post('phase-line/update', 'PhaseLineController::update', ['filter' => 'permission:graphs.rate.phase-line.update']);
-    $routes->post('phase-line/delete', 'PhaseLineController::delete', ['filter' => 'permission:graphs.rate.phase-line.delete']);
-
-
-    $routes->get('target-months', 'RateGraphsController::index_target_months', ['filter' => 'permission:graphs.rate.target-months.view']);
-
-    $routes->post('target-months/list', 'TargetMonthController::list', ['filter' => 'permission:graphs.rate.target-months.view']);
-    $routes->post('target-months/new', 'TargetMonthController::create', ['filter' => 'permission:graphs.rate.target-months.create']);
-    $routes->post('target-months/get-selected', 'TargetMonthController::get_selected', ['filter' => 'permission:graphs.rate.target-months.update']);
-    $routes->post('target-months/update', 'TargetMonthController::update', ['filter' => 'permission:graphs.rate.target-months.update']);
-    $routes->post('target-months/delete', 'TargetMonthController::delete', ['filter' => 'permission:graphs.rate.target-months.delete']);
-});
-
-/************************************************************************************************************************************************** */
-
-// KPI Routes
-$routes->group('/kpi', ['namespace' => 'App\Controllers\KPI'], static function ($routes) {
-    $routes->get('rate-data', 'KPIController::rate_data', ['filter' => 'permission:kpi.rate-data.view']);
-    $routes->get('client-target', 'KPIController::client_target', ['filter' => 'permission:kpi.client-target.view']);
-    $routes->post('client-target/data', 'KPIController::client_target_data', ['filter' => 'permission:kpi.client-target.view']);
-    $routes->post('client-target-month-vise/data', 'KPIController::client_target_data_by_month', ['filter' => 'permission:kpi.client-target.view']);
-    $routes->get('supervisor-target', 'KPIController::supervisor_target', ['filter' => 'permission:kpi.supervisor-target.view']);
-});
 
  
 
@@ -586,51 +583,3 @@ $routes->group('/kpi', ['namespace' => 'App\Controllers\KPI'], static function (
 //$routes->get('test-ai-agent', 'TestAiAgent::index');
 
 
-/************************************************************************************************************************************************** */
-
-// Reporting Routes
-$routes->group('/reports/daily', ['namespace' => 'App\Controllers\Reports'], static function ($routes) {
-    $routes->get('', 'DailyReportController::index', ['filter' => 'permission:reporting.daily.view']);
-    $routes->post('state-token', 'DailyReportController::stateToken', ['filter' => 'permission:reporting.daily.view']);
-    $routes->post('data', 'DailyReportController::data', ['filter' => 'permission:reporting.daily.view']);
-    $routes->post('check-generate', 'DailyReportController::checkGenerate', ['filter' => 'permission:reporting.daily.generate']);
-    $routes->post('generate', 'DailyReportController::generate', ['filter' => 'permission:reporting.daily.generate']);
-    $routes->post('versions', 'DailyReportController::versions', ['filter' => 'permission:reporting.daily.view']);
-    $routes->get('version/(:num)/draft', 'DailyReportController::draft/$1', ['filter' => 'permission:reporting.daily.view']);
-    $routes->post('version/(:num)/save-draft', 'DailyReportController::saveDraft/$1', ['filter' => 'permission:reporting.daily.save-draft']);
-    $routes->post('version/(:num)/pull-section', 'DailyReportController::pullSection/$1', ['filter' => 'permission:reporting.daily.pull-section']);
-    $routes->post('version/(:num)/images', 'DailyReportController::images/$1', ['filter' => 'permission:reporting.daily.view']);
-    $routes->post('version/(:num)/images/upload', 'DailyReportController::uploadImages/$1', ['filter' => 'permission:reporting.daily.save-draft']);
-    $routes->post('version/(:num)/images/(:num)/delete', 'DailyReportController::deleteImage/$1/$2', ['filter' => 'permission:reporting.daily.save-draft']);
-    $routes->post('version/(:num)/images/(:num)/replace', 'DailyReportController::replaceImage/$1/$2', ['filter' => 'permission:reporting.daily.save-draft']);
-    $routes->get('version/(:num)/images/(:num)/view', 'DailyReportController::viewImage/$1/$2', ['filter' => 'permission:reporting.daily.view']);
-    $routes->post('version/(:num)/finalize', 'DailyReportController::finalize/$1', ['filter' => 'permission:reporting.daily.finalize']);
-    $routes->post('version/(:num)/regenerate', 'DailyReportController::regenerate/$1', ['filter' => 'permission:reporting.daily.regenerate']);
-    $routes->post('version/(:num)/delete', 'DailyReportController::deleteVersion/$1', ['filter' => 'permission:reporting.daily.delete-version']);
-    $routes->post('report/(:num)/delete-all', 'DailyReportController::deleteAll/$1', ['filter' => 'permission:reporting.daily.delete-all']);
-    $routes->get('version/(:num)/pdf', 'DailyReportController::pdf/$1', ['filter' => 'permission:reporting.daily.view']);
-    $routes->post('send', 'DailyReportController::send', ['filter' => 'permission:reporting.daily.send']);
-});
-
-$routes->group('/reports/progress', ['namespace' => 'App\Controllers\Reports'], static function ($routes) {
-    $routes->get('', 'ProgressReportController::index', ['filter' => 'permission:reporting.progress.view']);
-    $routes->post('state-token', 'ProgressReportController::stateToken', ['filter' => 'permission:reporting.progress.view']);
-    $routes->post('data', 'ProgressReportController::data', ['filter' => 'permission:reporting.progress.view']);
-    $routes->post('check-generate', 'ProgressReportController::checkGenerate', ['filter' => 'permission:reporting.progress.generate']);
-    $routes->post('generate', 'ProgressReportController::generate', ['filter' => 'permission:reporting.progress.generate']);
-    $routes->post('versions', 'ProgressReportController::versions', ['filter' => 'permission:reporting.progress.view']);
-    $routes->get('version/(:num)/draft', 'ProgressReportController::draft/$1', ['filter' => 'permission:reporting.progress.view']);
-    $routes->post('version/(:num)/save-draft', 'ProgressReportController::saveDraft/$1', ['filter' => 'permission:reporting.progress.save-draft']);
-    $routes->post('version/(:num)/instructional-images', 'ProgressReportController::instructionalImages/$1', ['filter' => 'permission:reporting.progress.view']);
-    $routes->post('version/(:num)/instructional-images/upload', 'ProgressReportController::uploadInstructionalImages/$1', ['filter' => 'permission:reporting.progress.save-draft']);
-    $routes->post('version/(:num)/instructional-images/(:num)/delete', 'ProgressReportController::deleteInstructionalImage/$1/$2', ['filter' => 'permission:reporting.progress.save-draft']);
-    $routes->post('version/(:num)/instructional-images/(:num)/replace', 'ProgressReportController::replaceInstructionalImage/$1/$2', ['filter' => 'permission:reporting.progress.save-draft']);
-    $routes->get('version/(:num)/instructional-images/(:num)/view', 'ProgressReportController::viewInstructionalImage/$1/$2', ['filter' => 'permission:reporting.progress.view']);
-    $routes->post('version/(:num)/pull-section', 'ProgressReportController::pullSection/$1', ['filter' => 'permission:reporting.progress.pull-section']);
-    $routes->post('version/(:num)/update-section-state', 'ProgressReportController::updateSectionState/$1', ['filter' => 'permission:reporting.progress.save-draft']);
-    $routes->post('version/(:num)/finalize', 'ProgressReportController::finalize/$1', ['filter' => 'permission:reporting.progress.finalize']);
-    $routes->post('version/(:num)/regenerate', 'ProgressReportController::regenerate/$1', ['filter' => 'permission:reporting.progress.regenerate']);
-    $routes->post('version/(:num)/delete', 'ProgressReportController::deleteVersion/$1', ['filter' => 'permission:reporting.progress.delete-version']);
-    $routes->post('report/(:num)/delete-all', 'ProgressReportController::deleteAll/$1', ['filter' => 'permission:reporting.progress.delete-all']);
-    $routes->get('version/(:num)/pdf', 'ProgressReportController::pdf/$1', ['filter' => 'permission:reporting.progress.view-pdf']);
-});

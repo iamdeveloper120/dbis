@@ -78,13 +78,24 @@
 <?= $this->section("page_js") ?>
 <script>
     $(document).ready(function() {
+        var canGenerateReport = <?= auth()->user()->can('client-profile.reports.progress.generate') ? 'true' : 'false' ?>;
+        var canDeleteVersion = <?= auth()->user()->can('client-profile.reports.progress.delete-version') ? 'true' : 'false' ?>;
+        var canDeleteAll = <?= auth()->user()->can('client-profile.reports.progress.delete-all') ? 'true' : 'false' ?>;
         var csrfToken = "<?= csrf_hash() ?>";
         var encodedClientId = "<?= esc($encodedClientId ?? '', 'js') ?>";
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
-            }
-        });
+        $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': csrfToken } });
+
+        var baseUrl = '<?= base_url('client-profile/reports/progress') ?>/' + encodedClientId;
+        var legacyDataUrl = '<?= base_url('client-profile/reports/progress/data') ?>/' + encodedClientId;
+        var legacyVersionsUrl = '<?= base_url('client-profile/reports/progress/versions') ?>/' + encodedClientId;
+
+        function buildPdfUrl(versionId) {
+            return '<?= base_url('client-profile/reports/progress/version') ?>/' + encodedClientId + '/' + versionId + '/pdf';
+        }
+
+        function buildDraftUrl(versionId) {
+            return baseUrl + '/version/' + versionId + '/draft';
+        }
 
         function showPageLoader() {
             $('#page_loader_overlay').css('display', 'flex');
@@ -94,10 +105,6 @@
             $('#page_loader_overlay').hide();
         }
 
-        function buildPdfUrl(versionId) {
-            return '<?= base_url('client-profile/reports/progress/version') ?>/' + encodedClientId + '/' + versionId + '/pdf';
-        }
-
         function postWithLoader(url, payload) {
             showPageLoader();
             return $.post(url, payload).always(function() {
@@ -105,63 +112,130 @@
             });
         }
 
+        function startGenerateProgress() {
+            var fromId = 'swal_pr_from_' + Date.now();
+            var toId = 'swal_pr_to_' + Date.now();
+            Swal.fire({
+                title: 'Generate Progress Report',
+                html: '<div class="mb-3"><label class="form-label">Period From</label><input id="' + fromId + '" type="text" class="form-control flatpickr-input" placeholder="Select start date" readonly></div>' +
+                      '<div><label class="form-label">Period To</label><input id="' + toId + '" type="text" class="form-control flatpickr-input" placeholder="Select end date" readonly></div>',
+                showCancelButton: true,
+                confirmButtonText: 'Check & Generate',
+                cancelButtonText: 'Cancel',
+                customClass: { confirmButton: 'btn btn-info w-xs me-2 mt-2', cancelButton: 'btn btn-secondary w-xs mt-2' },
+                buttonsStyling: false,
+                didOpen: function() {
+                    flatpickr('#' + fromId, { dateFormat: dateFormat, weekNumbers: true });
+                    flatpickr('#' + toId, { dateFormat: dateFormat, weekNumbers: true });
+                },
+                preConfirm: function() {
+                    var fromInput = document.getElementById(fromId);
+                    var toInput = document.getElementById(toId);
+                    var fromFp = fromInput && fromInput._flatpickr ? fromInput._flatpickr : null;
+                    var toFp = toInput && toInput._flatpickr ? toInput._flatpickr : null;
+                    var periodFrom = fromFp && fromFp.selectedDates && fromFp.selectedDates.length > 0
+                        ? moment(fromFp.selectedDates[0]).format('YYYY-MM-DD') : '';
+                    var periodTo = toFp && toFp.selectedDates && toFp.selectedDates.length > 0
+                        ? moment(toFp.selectedDates[0]).format('YYYY-MM-DD') : '';
+                    if (!periodFrom || !periodTo) {
+                        Swal.showValidationMessage('Please select both Period From and Period To dates.');
+                        return false;
+                    }
+                    return { period_from: periodFrom, period_to: periodTo };
+                }
+            }).then(function(result) {
+                if (!result.isConfirmed || !result.value) return;
+                var periodFrom = result.value.period_from;
+                var periodTo = result.value.period_to;
+                showPageLoader();
+                $.post(baseUrl + '/check-generate', { period_from: periodFrom, period_to: periodTo })
+                    .done(function(res) {
+                        hidePageLoader();
+                        if (res.status === 'success') {
+                            Swal.fire({
+                                title: 'Generate Progress Report',
+                                text: res.message || 'Generate draft for this period?',
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonText: 'Generate',
+                                cancelButtonText: 'Cancel',
+                                customClass: { confirmButton: 'btn btn-primary w-xs me-2 mt-2', cancelButton: 'btn btn-secondary w-xs mt-2' },
+                                buttonsStyling: false
+                            }).then(function(conf) {
+                                if (!conf.isConfirmed) return;
+                                showPageLoader();
+                                $.post(baseUrl + '/generate', { period_from: periodFrom, period_to: periodTo })
+                                    .done(function(genRes) {
+                                        hidePageLoader();
+                                        if (genRes.status === 'success') {
+                                            var draftUrl = genRes.data && genRes.data.draft_url ? genRes.data.draft_url : '';
+                                            if (draftUrl) {
+                                                window.location.href = draftUrl;
+                                            } else {
+                                                showAlert('Progress Report', 'Draft generated successfully.', 'success');
+                                                table.ajax.reload();
+                                            }
+                                        } else {
+                                            showAlert(genRes.statusText, genRes.message || 'Generation failed.', 'error');
+                                        }
+                                    })
+                                    .fail(function(jqXHR) {
+                                        hidePageLoader();
+                                        showAlert(jqXHR.status, 'Request failed.', 'error');
+                                    });
+                            });
+                        } else if (res.statusText === 'ExactPeriodExists') {
+                            showAlert(res.statusText, res.message || 'A report for this exact period already exists.', 'warning');
+                        } else {
+                            showAlert(res.statusText, res.message || 'Cannot generate report.', 'error');
+                        }
+                    })
+                    .fail(function(jqXHR) {
+                        hidePageLoader();
+                        showAlert(jqXHR.status, 'Request failed.', 'error');
+                    });
+            });
+        }
+
+        var buttonsConfig = [
+            { extend: 'pageLength', className: 'btn btn-light bg-gradient waves-effect waves-light' },
+            { extend: 'copy', className: 'btn btn-light bg-gradient waves-effect waves-light' },
+            { extend: 'excel', className: 'btn btn-light bg-gradient waves-effect waves-light' },
+            { extend: 'colvis', className: 'btn btn-light bg-gradient waves-effect waves-light' }
+        ];
+
+        if (canGenerateReport) {
+            buttonsConfig.unshift({
+                text: '<i class="ri-file-add-line align-bottom me-1"></i>Generate Draft',
+                className: 'btn btn-soft-info waves-effect waves-light material-shadow-none',
+                action: function() { startGenerateProgress(); }
+            });
+        }
+
         var table = $('#progress_report_datatable').DataTable({
             ajax: {
-                url: '<?= base_url('client-profile/reports/progress/data') ?>/' + encodedClientId,
+                url: legacyDataUrl,
                 type: 'POST',
-                beforeSend: function() {
-                    showPageLoader();
-                },
-                complete: function() {
-                    hidePageLoader();
-                },
-                error: function() {
-                    hidePageLoader();
-                },
+                beforeSend: function() { showPageLoader(); },
+                complete: function() { hidePageLoader(); },
+                error: function() { hidePageLoader(); },
                 dataSrc: function(json) {
                     return (json && json.data) ? json.data : [];
                 }
             },
             lengthChange: false,
             layout: {
-                topStart: {
-                    buttons: [{
-                            extend: 'pageLength',
-                            className: 'btn btn-light bg-gradient waves-effect waves-light'
-                        },
-                        {
-                            extend: 'copy',
-                            className: 'btn btn-light bg-gradient waves-effect waves-light'
-                        },
-                        {
-                            extend: 'excel',
-                            className: 'btn btn-light bg-gradient waves-effect waves-light'
-                        },
-                        {
-                            extend: 'colvis',
-                            className: 'btn btn-light bg-gradient waves-effect waves-light'
-                        }
-                    ]
-                },
-                topEnd: {
-                    search: {
-                        placeholder: 'Search'
-                    }
-                }
+                topStart: { buttons: buttonsConfig },
+                topEnd: { search: { placeholder: 'Search' } }
             },
-            order: [
-                [1, 'desc']
-            ],
-            columns: [{
-                    data: 'report_id'
-                },
+            order: [[1, 'desc']],
+            columns: [
+                { data: 'report_id' },
                 {
                     data: 'period_from',
                     render: function(data, type, row) {
                         if (!data) return '';
-                        if (type === 'sort' || type === 'type') {
-                            return moment(data, 'YYYY-MM-DD').format('YYYYMMDD');
-                        }
+                        if (type === 'sort' || type === 'type') return moment(data, 'YYYY-MM-DD').format('YYYYMMDD');
                         return row.period_from_display || moment(data, 'YYYY-MM-DD').format(momentDateFormat);
                     }
                 },
@@ -169,9 +243,7 @@
                     data: 'period_to',
                     render: function(data, type, row) {
                         if (!data) return '';
-                        if (type === 'sort' || type === 'type') {
-                            return moment(data, 'YYYY-MM-DD').format('YYYYMMDD');
-                        }
+                        if (type === 'sort' || type === 'type') return moment(data, 'YYYY-MM-DD').format('YYYYMMDD');
                         return row.period_to_display || moment(data, 'YYYY-MM-DD').format(momentDateFormat);
                     }
                 },
@@ -184,10 +256,10 @@
                 {
                     data: 'latest_status',
                     render: function(data) {
-                        if (String(data || '').toUpperCase() === 'FINAL') {
-                            return '<span class="badge bg-success-subtle text-success text-uppercase">Final</span>';
-                        }
-                        return '<span class="badge bg-secondary-subtle text-secondary text-uppercase">N/A</span>';
+                        var s = String(data || '').toUpperCase();
+                        if (s === 'FINAL') return '<span class="badge bg-success-subtle text-success text-uppercase">Final</span>';
+                        if (s === 'DRAFT') return '<span class="badge bg-warning-subtle text-warning text-uppercase">Draft</span>';
+                        return '<span class="badge bg-secondary-subtle text-secondary text-uppercase">' + (data || 'N/A') + '</span>';
                     }
                 },
                 {
@@ -195,9 +267,7 @@
                     defaultContent: '',
                     render: function(data, type, row) {
                         if (!data) return '';
-                        if (type === 'sort' || type === 'type') {
-                            return moment(data).format('YYYYMMDDHHmmss');
-                        }
+                        if (type === 'sort' || type === 'type') return moment(data).format('YYYYMMDDHHmmss');
                         return row.created_at_display || moment(data).format(momentDateFormat + ' HH:mm:ss');
                     }
                 },
@@ -206,9 +276,7 @@
                     defaultContent: '',
                     render: function(data, type, row) {
                         if (!data) return '';
-                        if (type === 'sort' || type === 'type') {
-                            return moment(data).format('YYYYMMDDHHmmss');
-                        }
+                        if (type === 'sort' || type === 'type') return moment(data).format('YYYYMMDDHHmmss');
                         return row.updated_at_display || moment(data).format(momentDateFormat + ' HH:mm:ss');
                     }
                 },
@@ -216,6 +284,7 @@
                     data: null,
                     orderable: false,
                     render: function(data, type, row) {
+                        var status = String(row.latest_status || '').toUpperCase();
                         var menu = '<div class="dropdown d-inline-block float-end">';
                         menu += '<a class="btn btn-soft-secondary btn-sm" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-settings-3-fill align-middle"></i></a>';
                         menu += '<ul class="dropdown-menu dropdown-menu-end">';
@@ -225,8 +294,17 @@
                             menu += '<li><a class="dropdown-item versions" href="#" data-report-id="' + row.report_id + '" data-period-label="' + periodLabel + '"><i class="ri-history-line align-bottom me-2 text-muted"></i>View Versions</a></li>';
                         }
 
-                        if (row.latest_version_id) {
+                        if (status === 'DRAFT' && row.latest_version_id) {
+                            menu += '<li><a class="dropdown-item" href="' + buildDraftUrl(row.latest_version_id) + '"><i class="ri-edit-line align-bottom me-2 text-muted"></i>Edit Draft</a></li>';
+                        }
+
+                        if (status === 'FINAL' && row.latest_version_id) {
                             menu += '<li><a class="dropdown-item" target="_blank" href="' + buildPdfUrl(row.latest_version_id) + '"><i class="ri-file-pdf-line align-bottom me-2 text-muted"></i>View Latest PDF</a></li>';
+                        }
+
+                        if (canDeleteAll && row.report_id) {
+                            menu += '<li><hr class="dropdown-divider"></li>';
+                            menu += '<li><a class="dropdown-item text-danger delete-all" href="#" data-report-id="' + row.report_id + '" data-period-label="' + ((row.period_from_display || row.period_from || '') + ' to ' + (row.period_to_display || row.period_to || '')) + '"><i class="ri-delete-bin-line align-bottom me-2"></i>Delete All Versions</a></li>';
                         }
 
                         menu += '</ul></div>';
@@ -242,9 +320,7 @@
             var periodLabel = $(this).data('period-label') || '';
             $('#versions_modal_title').text('Report Versions [' + periodLabel + ']');
 
-            postWithLoader('<?= base_url('client-profile/reports/progress/versions') ?>/' + encodedClientId, {
-                    report_id: reportId
-                })
+            postWithLoader(legacyVersionsUrl, { report_id: reportId })
                 .done(function(response) {
                     if (response.status !== 'success') {
                         showAlert(response.statusText, response.message, response.status);
@@ -254,21 +330,31 @@
                     var rows = response.data || [];
                     var html = '';
                     rows.forEach(function(row) {
-                        var viewBtn = row.version_id
-                            ? '<a target="_blank" class="btn btn-sm btn-light" href="' + buildPdfUrl(row.version_id) + '">View PDF</a>'
-                            : '<button class="btn btn-sm btn-light" disabled>No PDF</button>';
+                        var status = String(row.status || '').toUpperCase();
+                        var statusBadge = status === 'FINAL'
+                            ? '<span class="badge bg-success-subtle text-success">Final</span>'
+                            : '<span class="badge bg-warning-subtle text-warning">Draft</span>';
+
+                        var actionBtn = '';
+                        if (status === 'DRAFT' && row.version_id) {
+                            actionBtn = '<a class="btn btn-sm btn-light" href="' + buildDraftUrl(row.version_id) + '">Edit Draft</a>';
+                        } else if (row.version_id) {
+                            actionBtn = '<a target="_blank" class="btn btn-sm btn-light" href="' + buildPdfUrl(row.version_id) + '">View PDF</a>';
+                        } else {
+                            actionBtn = '<button class="btn btn-sm btn-light" disabled>N/A</button>';
+                        }
 
                         html += '<tr>' +
                             '<td>v' + row.version_no + '</td>' +
-                            '<td>' + (row.status || 'FINAL') + '</td>' +
+                            '<td>' + statusBadge + '</td>' +
                             '<td>' + (row.generated_at_display || row.generated_at || '') + '</td>' +
                             '<td>' + (row.generated_by_name || '-') + '</td>' +
-                            '<td>' + viewBtn + '</td>' +
+                            '<td>' + actionBtn + '</td>' +
                             '</tr>';
                     });
 
                     if (html === '') {
-                        html = '<tr><td colspan="5" class="text-center">No final versions found.</td></tr>';
+                        html = '<tr><td colspan="5" class="text-center">No versions found.</td></tr>';
                     }
 
                     $('#versions_table tbody').html(html);
@@ -277,6 +363,35 @@
                 .fail(function(jqXHR, textStatus, error) {
                     showAlert(jqXHR.status, 'Request failed: ' + textStatus + '<br>' + error, 'error');
                 });
+        });
+
+        $('#progress_report_datatable').on('click', '.delete-all', function(e) {
+            e.preventDefault();
+            var reportId = $(this).data('report-id');
+            var periodLabel = $(this).data('period-label') || '';
+            Swal.fire({
+                title: 'Delete All Versions',
+                text: 'Delete all versions for period ' + (periodLabel || 'this report') + '? This cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Delete',
+                cancelButtonText: 'Cancel',
+                customClass: { confirmButton: 'btn btn-danger w-xs me-2 mt-2', cancelButton: 'btn btn-secondary w-xs mt-2' },
+                buttonsStyling: false
+            }).then(function(res) {
+                if (!res.isConfirmed) return;
+                postWithLoader(baseUrl + '/report/' + reportId + '/delete-all', {})
+                    .done(function(result) {
+                        if (result.status === 'success') {
+                            table.ajax.reload();
+                        } else {
+                            showAlert(result.statusText, result.message, 'error');
+                        }
+                    })
+                    .fail(function(jqXHR) {
+                        showAlert(jqXHR.status, 'Request failed.', 'error');
+                    });
+            });
         });
     });
 </script>
