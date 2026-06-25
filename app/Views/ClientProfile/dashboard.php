@@ -1048,13 +1048,12 @@ $keyInformationField = static function (array $data, string $key): string {
             }
 
             $.ajax({
-                url: "/graphs/cumulative",
+                url: "/client-profile/graphs/cumulative/<?= encodeValue($client->id) ?>/data",
                 type: "post",
                 headers: {
                     "X-CSRF-TOKEN": csrfToken
                 },
                 data: {
-                    client_id: clientId,
                     start_date: "",
                     end_date: ""
                 }
@@ -1103,10 +1102,9 @@ $keyInformationField = static function (array $data, string $key): string {
             }
 
             var ajaxRequest = $.ajax({
-                url: "/graphs/dailyData",
+                url: "/client-profile/graphs/daily/<?= encodeValue($client->id) ?>/data",
                 type: "post",
                 data: {
-                    "client_id": clientId,
                     "start_date": startDate,
                     "end_date": endDate
                 }

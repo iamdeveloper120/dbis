@@ -240,11 +240,9 @@
 
         function loadRateGraph() {
             var ajaxRequest = $.ajax({
-                url: '/graphs/rate',
+                url: '/client-profile/graphs/rate/<?= encodeValue($client->id) ?>/data',
                 type: 'post',
-                data: {
-                    "client_id": client_id
-                },
+                data: {},
 
             });
             ajaxRequest.done(function(response) {

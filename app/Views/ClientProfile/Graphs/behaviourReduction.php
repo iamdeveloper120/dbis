@@ -270,10 +270,9 @@
 
         function loadGraphs(start_date = null, end_date = null) {
             var ajaxRequest = $.ajax({
-                url: '/graphs/dailyData',
+                url: '/client-profile/graphs/daily/<?= encodeValue($client->id) ?>/data',
                 type: 'post',
                 data: {
-                    "client_id": client_id,
                     "start_date": start_date,
                     "end_date": end_date
                 }

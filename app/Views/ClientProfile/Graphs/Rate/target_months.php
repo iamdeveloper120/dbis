@@ -10,42 +10,101 @@
                     <div class="card-header border-bottom-dashed pb-0 mb-0">
                         <?= view('ClientProfile/Graphs/Rate/_tabs', ['tab' => 'target-months']) ?>
                     </div>
-
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table id="target_months_table" class="table table-bordered  align-middle" style="width:100%"> </table>
+                            <table id="target_months_table" class="table table-bordered align-middle" style="width:100%"> </table>
                         </div>
                     </div>
-
                 </div>
                 <!--end col-->
             </div>
         </div>
     </div>
 </div>
+<?= $this->endSection() ?>
+<?= $this->section("page_modal") ?>
+<div class="modal fade" id="add_modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light p-3">
+                <h5 class="modal-title">Add Target Month</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="#" method="post" autocomplete="off">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="mb-3">
+                            <label class="form-label" for="a_target_date">Date *</label>
+                            <input type="text" class="form-control" id="a_target_date">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="a_graph_type">Graph Type *</label>
+                            <select class="form-control" id="a_graph_type">
+                                <option value="">SELECT</option>
+                                <option value="Skills">Skills</option>
+                                <option value="DOI">DOI</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="hstack gap-2 justify-content-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="ri-close-line align-bottom me-1"></i>Close</button>
+                        <button type="button" class="btn btn-primary" id="btn_add"><i class="ri-save-line align-bottom me-1"></i>Save</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
+<div class="modal fade" id="update_modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light p-3">
+                <h5 class="modal-title">Update Target Month</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <input type="hidden" id="u_id">
+                    <div class="mb-3">
+                        <label class="form-label" for="u_target_date">Date *</label>
+                        <input type="text" class="form-control" id="u_target_date">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="u_graph_type">Graph Type *</label>
+                        <select class="form-control" id="u_graph_type">
+                            <option value="">SELECT</option>
+                            <option value="Skills">Skills</option>
+                            <option value="DOI">DOI</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="hstack gap-2 justify-content-end">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="ri-close-line align-bottom me-1"></i>Close</button>
+                    <button type="button" class="btn btn-primary" id="btn_update"><i class="ri-save-line align-bottom me-1"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <?= $this->endSection() ?>
 <?= $this->section("page_js") ?>
+<script type='text/javascript' src='/assets/libs/flatpickr/plugins/monthSelect/index.js'></script>
+<link href="/assets/libs/flatpickr/plugins/monthSelect/style.css" rel="stylesheet" />
 <script>
     $(document).ready(function() {
-        /***************************************************************************************** */
-        let client_id = "<?= $client->id ?>"; // passed from controller
+
         var csrfToken = "<?= csrf_hash() ?>";
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-            }
-        });
-        // Page-level loader binding (ONLY for this page)
-        $(document).ajaxStart(function() {
-            showPageLoader();
-        });
+        $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': csrfToken } });
+        $(document).ajaxStart(function() { showPageLoader(); });
+        $(document).ajaxStop(function() { hidePageLoader(); });
 
-        $(document).ajaxStop(function() {
-            hidePageLoader();
-        });
-        /***************************************************************************************** */
-
+        var baseUrl = '/client-profile/graphs/rate/<?= encodeValue($client->id) ?>/target-months';
+        var current_row;
         var dataSet = [];
 
         table = $('#target_months_table').DataTable({
@@ -53,96 +112,221 @@
             data: dataSet,
             lengthChange: false,
             ordering: false,
-            lengthMenu: [
-                [10, 25, 50, -1],
-                ['10 rows', '25 rows', '50 rows', 'Show all']
-            ],
+            lengthMenu: [[10, 25, 50, -1], ['10 rows', '25 rows', '50 rows', 'Show all']],
             layout: {
                 topStart: {
-                    buttons: [{
-                            extend: 'pageLength',
-                            className: 'btn btn-light bg-gradient waves-effect waves-light'
-                        },
+                    buttons: [
                         {
-                            extend: 'copy',
-                            className: 'btn btn-light bg-gradient waves-effect waves-light'
+                            text: '<i class="ri-add-line align-bottom me-1"></i>Add Target Month',
+                            className: 'btn btn-soft-info waves-effect waves-light material-shadow-none',
+                            action: function() { show_add_modal(); }
                         },
-                        {
-                            extend: 'excel',
-                            className: 'btn btn-light bg-gradient waves-effect waves-light'
-                        },
-                        {
-                            extend: 'colvis',
-                            className: 'btn btn-light bg-gradient waves-effect waves-light'
-                        }
+                        { extend: 'pageLength', className: 'btn btn-light bg-gradient waves-effect waves-light' },
+                        { extend: 'copy',       className: 'btn btn-light bg-gradient waves-effect waves-light' },
+                        { extend: 'excel',      className: 'btn btn-light bg-gradient waves-effect waves-light' },
+                        { extend: 'colvis',     className: 'btn btn-light bg-gradient waves-effect waves-light' }
                     ]
                 },
-                topEnd: {
-                    search: {
-                        placeholder: 'Search'
+                topEnd: { search: { placeholder: 'Search' } }
+            },
+            columnDefs: [
+                {
+                    targets: [0],
+                    render: function(data, type, row) { return row.date; }
+                },
+                { targets: [0, 1, 2], className: 'dt-nowrap' },
+                {
+                    targets: [2],
+                    render: function(data, type, row) {
+                        return '<div class="btn-group" role="group">' +
+                            '<button id="' + row.id + '" type="button" class="btn btn-outline-warning btn-icon waves-effect waves-light update btn-sm"><i class="ri-edit-line"></i></button>&nbsp;' +
+                            '<button id="' + row.id + '" type="button" class="btn btn-outline-danger btn-icon waves-effect waves-light delete btn-sm"><i class="ri-delete-bin-line"></i></button>' +
+                            '</div>';
                     }
                 }
-            },
-
-            columnDefs: [{
-                    targets: [0],
-                    render: function(data, type, row) {
-                        // Return the formatted date for display
-                        return row.date;
-                    }
-                },
-
-                {
-                    targets: [0, 1],
-                    className: 'dt-nowrap'
-                },
             ],
-            columns: [{
-                    data: 't_date',
-                    title: 'Date'
-                }, // Date
-                {
-                    data: 'graph_type',
-                    title: 'Graphs Type'
-                },
+            columns: [
+                { data: 't_date',     title: 'Date' },
+                { data: 'graph_type', title: 'Graph Type' },
+                { data: null,         title: 'Action' }
             ]
-
-
         });
 
-        /****************************************************************************************  */
-
         function loadTargetMonths() {
-
             var ajaxRequest = $.ajax({
-                url: '/graphs/rate/target-months/list',
+                url: baseUrl + '/list',
                 type: 'post',
-                data: {
-                    "client_id": client_id,
-                },
-                beforeSend: function(xhr) {
-
-                }
+                data: {}
             });
             ajaxRequest.done(function(response) {
-                if (response.status == 'success') {
+                if (response.status === 'success') {
                     table.clear();
                     table.rows.add(response.data);
                     table.draw();
-                } else if (response.status == 'validation_error') {
-                    let errors = Object.values(response.message);
-                    displayValidationErrors(errors);
                 } else {
                     showAlert(response.statusText, response.message, response.status);
                 }
             });
-
             ajaxRequest.fail(function(jqXHR, textStatus, error) {
                 showAlert(jqXHR.status, "Request failed: " + textStatus + '<br>' + error, 'error');
             });
         }
         loadTargetMonths();
-        /***************************************************************************************** */
+
+        function show_add_modal() {
+            $('#a_target_date').val('');
+            $('#a_graph_type').val('');
+            $('#add_modal').modal('show');
+        }
+
+        $("#a_target_date").flatpickr({
+            maxDate: 'today',
+            plugins: [
+                new monthSelectPlugin({
+                    shorthand: true,
+                    dateFormat: "M-Y",
+                    altFormat: "M-Y",
+                    theme: "dark"
+                })
+            ]
+        });
+
+        $('#btn_add').on('click', function() {
+            var btn = $(this);
+            var ajaxRequest = $.ajax({
+                url: baseUrl + '/new',
+                type: 'post',
+                data: { 't_date': $('#a_target_date').val(), 'graph_type': $('#a_graph_type').val() },
+                beforeSend: function() { btn.prop('disabled', true); }
+            });
+            ajaxRequest.done(function(response) {
+                if (response.status === 'success') {
+                    var currentData = table.data().toArray();
+                    currentData.unshift(response.data);
+                    table.clear().rows.add(currentData).draw(false);
+                    table.page('first').draw(false);
+                    $(table.row(0).node()).css({ 'background-color': '#d4f8d4', 'color': '#000' });
+                    $('#add_modal').modal('hide');
+                    showAlert(response.statusText, response.message, response.status);
+                } else {
+                    showAlert(response.statusText, response.message, response.status);
+                }
+            });
+            ajaxRequest.fail(function(jqXHR, textStatus, error) {
+                showAlert(jqXHR.status, "Request failed: " + textStatus + '<br>' + error, 'error');
+            });
+            ajaxRequest.always(function() { btn.prop('disabled', false); });
+        });
+
+        $('#add_modal').on('hidden.bs.modal', function() {
+            $('#a_target_date').val('');
+            $('#a_graph_type').val('');
+        });
+
+        $("#target_months_table").on('click', '.update', function() {
+            var btn = $(this);
+            var id  = $(this).attr('id');
+            current_row = $(this).parents('tr');
+            if (current_row.hasClass('child')) { current_row = current_row.prev(); }
+
+            var ajaxRequest = $.ajax({
+                url: baseUrl + '/get-selected',
+                type: 'post',
+                data: { "id": id },
+                beforeSend: function() { btn.prop('disabled', true); }
+            });
+            ajaxRequest.done(function(response) {
+                if (response.status === 'success') {
+                    var row_data = response.data;
+                    $('#u_id').val(row_data.id);
+                    $('#u_graph_type').val(row_data.graph_type);
+                    $("#u_target_date").flatpickr({
+                        defaultDate: row_data.t_date,
+                        maxDate: 'today',
+                        plugins: [
+                            new monthSelectPlugin({
+                                shorthand: true,
+                                dateFormat: "M-Y",
+                                altFormat: "M-Y",
+                                theme: "dark"
+                            })
+                        ]
+                    });
+                    $('#update_modal').modal('show');
+                } else {
+                    showAlert(response.statusText, response.message, response.status);
+                }
+            });
+            ajaxRequest.fail(function(jqXHR, textStatus, error) {
+                showAlert(jqXHR.status, "Request failed: " + textStatus + '<br>' + error, 'error');
+            });
+            ajaxRequest.always(function() { btn.prop('disabled', false); });
+        });
+
+        $('#btn_update').on('click', function() {
+            var btn = $(this);
+            var ajaxRequest = $.ajax({
+                url: baseUrl + '/update',
+                type: 'post',
+                data: { 'id': $('#u_id').val(), 't_date': $('#u_target_date').val(), 'graph_type': $('#u_graph_type').val() },
+                beforeSend: function() { btn.prop('disabled', true); }
+            });
+            ajaxRequest.done(function(response) {
+                if (response.status === 'success') {
+                    $(table.row(current_row).data(response.data).draw(false).node()).css({ 'background-color': '#d4ebf8', 'color': '#000' });
+                    $('#update_modal').modal('hide');
+                    showAlert(response.statusText, response.message, response.status);
+                } else {
+                    showAlert(response.statusText, response.message, response.status);
+                }
+            });
+            ajaxRequest.fail(function(jqXHR, textStatus, error) {
+                showAlert(jqXHR.status, "Request failed: " + textStatus + '<br>' + error, 'error');
+            });
+            ajaxRequest.always(function() { btn.prop('disabled', false); });
+        });
+
+        $('#update_modal').on('hidden.bs.modal', function() {
+            $('#u_id').val('');
+            $('#u_target_date').val('');
+            $('#u_graph_type').val('');
+        });
+
+        $("#target_months_table").on('click', '.delete', function() {
+            var id = $(this).attr('id');
+            current_row = $(this).parents('tr');
+            if (current_row.hasClass('child')) { current_row = current_row.prev(); }
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Once deleted, you will not be able to recover this!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Delete',
+                confirmButtonClass: 'btn btn-primary w-xs me-2 mt-2',
+                cancelButtonClass: 'btn btn-danger w-xs me-2 mt-2',
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var ajaxRequest = $.ajax({
+                        url: baseUrl + '/delete',
+                        type: 'post',
+                        data: { 'id': id }
+                    });
+                    ajaxRequest.done(function(response) {
+                        if (response.status === 'success') {
+                            table.row(current_row).remove().draw(false);
+                            showAlert(response.statusText, response.message, response.status);
+                        } else {
+                            showAlert(response.statusText, response.message, response.status);
+                        }
+                    });
+                    ajaxRequest.fail(function(jqXHR, textStatus, error) {
+                        showAlert(jqXHR.status, "Request failed: " + textStatus + '<br>' + error, 'error');
+                    });
+                }
+            });
+        });
 
     });
 </script>

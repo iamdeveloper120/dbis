@@ -103,10 +103,9 @@
             if (domain_id !== '') {
                 // Send an AJAX request to fetch goals for the selected domain
                 $.ajax({
-                    url: '<?= base_url('graphs/cumulative/getClientDomainGoals') ?>',
+                    url: '/client-profile/graphs/cumulative/<?= encodeValue($client->id) ?>/domain-goals',
                     type: 'POST',
                     data: {
-                        client_id: client_id,
                         domain_id: domain_id,
                     },
                     success: function(response) {
@@ -244,10 +243,9 @@
             let sDomain = $("#sDomain").val();
             let sGoal = $("#sGoal").val();
             var ajaxRequest = $.ajax({
-                url: '/graphs/cumulative/domains-and-goals',
+                url: '/client-profile/graphs/cumulative/<?= encodeValue($client->id) ?>/domains-and-goals',
                 type: 'post',
                 data: {
-                    "client_id": client_id,
                     "domain_id": sDomain,
                     "goal_id": sGoal
                 },
@@ -315,11 +313,9 @@
             if (client_id !== '') {
                 // Send an AJAX request to fetch goals for the selected domain
                 $.ajax({
-                    url: '<?= base_url('graphs/cumulative/getClientDomains') ?>',
+                    url: '/client-profile/graphs/cumulative/<?= encodeValue($client->id) ?>/domains',
                     type: 'POST',
-                    data: {
-                        client_id: client_id,
-                    },
+                    data: {},
                     success: function(response) {
 
                         // Populate the Goals dropdown with the fetched goals from the object
@@ -343,10 +339,9 @@
             let sDomain = '';
             let sGoal = '';
             var ajaxRequest = $.ajax({
-                url: '/graphs/cumulative/domains-and-goals',
+                url: '/client-profile/graphs/cumulative/<?= encodeValue($client->id) ?>/domains-and-goals',
                 type: 'post',
                 data: {
-                    "client_id": client_id,
                     "domain_id": sDomain,
                     "goal_id": sGoal
                 },

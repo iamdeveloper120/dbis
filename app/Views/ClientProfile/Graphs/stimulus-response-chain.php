@@ -203,11 +203,9 @@
 
             if (!client_id) return;
             $.ajax({
-                url: '<?= base_url('graphs/stimulus-response-chain/getClientDomains') ?>',
+                url: '/client-profile/graphs/stimulus-response-chain/<?= encodeValue($client->id) ?>/domains',
                 type: 'POST',
-                data: {
-                    client_id: client_id
-                },
+                data: {},
                 success: function(response) {
                     if (response && response.length > 0) {
                         $.each(response, function(index, domain) {
@@ -230,10 +228,9 @@
             if (!client_id || !domain_id) return;
 
             $.ajax({
-                url: '<?= base_url('graphs/stimulus-response-chain/getClientDomainGoals') ?>',
+                url: '/client-profile/graphs/stimulus-response-chain/<?= encodeValue($client->id) ?>/domain-goals',
                 type: 'POST',
                 data: {
-                    client_id: client_id,
                     domain_id: domain_id
                 },
                 success: function(response) {
@@ -258,10 +255,9 @@
             if (!client_id || !goal_id) return;
 
             $.ajax({
-                url: '<?= base_url('graphs/stimulus-response-chain/getClientGoalTargets') ?>',
+                url: '/client-profile/graphs/stimulus-response-chain/<?= encodeValue($client->id) ?>/goal-targets',
                 type: 'POST',
                 data: {
-                    client_id: client_id,
                     goal_id: goal_id
                 },
                 success: function(response) {
@@ -307,10 +303,9 @@
             var target_id = $("#sTarget").val();
 
             var ajaxRequest = $.ajax({
-                url: '/graphs/stimulus-response-chain',
+                url: '/client-profile/graphs/stimulus-response-chain/<?= encodeValue($client->id) ?>/data',
                 type: 'POST',
                 data: {
-                    client_id: client_id,
                     domain_id: domain_id,
                     goal_id: goal_id,
                     target_id: target_id
