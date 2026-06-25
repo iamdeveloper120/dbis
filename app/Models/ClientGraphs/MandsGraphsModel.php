@@ -6,8 +6,8 @@ use CodeIgniter\Model;
 
 class MandsGraphsModel extends Model
 {
-    
- 
+    protected $DBGroup = 'default';
+
     public function getMandsSummaryDataForGraphs($client_id, $start_date, $end_date)
     {
 

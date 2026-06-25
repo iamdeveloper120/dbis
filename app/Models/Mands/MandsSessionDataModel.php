@@ -132,7 +132,7 @@ class MandsSessionDataModel extends Model
             ->where('client_id', $clientId)
             ->groupBy('reinforcer_input')
             ->orderBy('count', 'DESC')
-            ->orderBy('id', 'DESC'); // To handle tie cases, most recent first
+            ->orderBy('MAX(id)', 'DESC', false); // To handle tie cases, most recent first
 
         $repeatedResult = $builder->get()->getResultArray();
 
@@ -152,7 +152,7 @@ class MandsSessionDataModel extends Model
             $recentBuilder->select('reinforcer_input')
                 ->where('client_id', $clientId)
                 ->groupBy('reinforcer_input')
-                ->orderBy('id', 'DESC')
+                ->orderBy('MAX(id)', 'DESC', false)
                 ->limit($remaining);
 
             $recentResult = $recentBuilder->get()->getResultArray();
