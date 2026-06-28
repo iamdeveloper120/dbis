@@ -42,7 +42,7 @@
                                         <div class="position-relative h-100 d-flex flex-column">
                                             <div class="mb-4">
                                                 <a href="/" class="d-block">
-                                                    <img src="/assets/images/logo-light.png" alt="" height="">
+                                                    <img src="/assets/images/logo-light.png" alt="" height="55">
                                                 </a>
                                             </div>
                                             <!--<div class="mt-auto">
