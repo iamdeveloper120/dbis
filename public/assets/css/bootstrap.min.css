@@ -7,8 +7,8 @@
  */
 :root,
 [data-bs-theme=light] {
-    --vz-blue: #2074ba;
-    --vz-indigo: #2074BA;
+    --vz-blue: #1C3345;
+    --vz-indigo: #1C3345;
     --vz-purple: #6559cc;
     --vz-pink: #f672a7;
     --vz-red: #f06548;
@@ -29,16 +29,16 @@
     --vz-gray-700: #495057;
     --vz-gray-800: #343a40;
     --vz-gray-900: #212529;
-    --vz-primary: #2074BA;
-    --vz-secondary: #2074ba;
+    --vz-primary: #1C3345;
+    --vz-secondary: #9ED0C5;
     --vz-success: #0ab39c;
     --vz-info: #299cdb;
     --vz-warning: #f7b84b;
     --vz-danger: #f06548;
     --vz-light: #f3f6f9;
     --vz-dark: #212529;
-    --vz-primary-rgb: 64, 81, 137;
-    --vz-secondary-rgb: 53, 119, 241;
+    --vz-primary-rgb: 28, 51, 69;
+    --vz-secondary-rgb: 158, 208, 197;
     --vz-success-rgb: 10, 179, 156;
     --vz-info-rgb: 41, 156, 219;
     --vz-warning-rgb: 247, 184, 75;
@@ -93,11 +93,11 @@
     --vz-tertiary-bg: #eff2f7;
     --vz-tertiary-bg-rgb: 239, 242, 247;
     --vz-heading-color: #495057;
-    --vz-link-color: #2074BA;
-    --vz-link-color-rgb: 64, 81, 137;
+    --vz-link-color: #1C3345;
+    --vz-link-color-rgb: 28, 51, 69;
     --vz-link-decoration: none;
-    --vz-link-hover-color: #2074BA;
-    --vz-link-hover-color-rgb: 64, 81, 137;
+    --vz-link-hover-color: #1C3345;
+    --vz-link-hover-color-rgb: 28, 51, 69;
     --vz-code-color: #f672a7;
     --vz-highlight-color: #212529;
     --vz-highlight-bg: #fcf8e3;
@@ -149,8 +149,8 @@
     --vz-danger-text-emphasis: #f3846d;
     --vz-light-text-emphasis: #535659;
     --vz-dark-text-emphasis: #5f6164;
-    --vz-primary-bg-subtle: rgba(64, 81, 137, 0.15);
-    --vz-secondary-bg-subtle: rgba(53, 119, 241, 0.15);
+    --vz-primary-bg-subtle: rgba(28, 51, 69, 0.15);
+    --vz-secondary-bg-subtle: rgba(158, 208, 197, 0.15);
     --vz-success-bg-subtle: rgba(10, 179, 156, 0.15);
     --vz-info-bg-subtle: rgba(41, 156, 219, 0.15);
     --vz-warning-bg-subtle: rgba(247, 184, 75, 0.15);
@@ -3053,8 +3053,8 @@ textarea.form-control-lg {
 }
 
 .form-check-input:checked {
-    background-color: #2074BA;
-    border-color: #2074BA
+    background-color: #1C3345;
+    border-color: #1C3345
 }
 
 .form-check-input:checked[type=checkbox] {
@@ -3066,8 +3066,8 @@ textarea.form-control-lg {
 }
 
 .form-check-input[type=checkbox]:indeterminate {
-    background-color: #2074BA;
-    border-color: #2074BA;
+    background-color: #1C3345;
+    border-color: #1C3345;
     --vz-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e")
 }
 
@@ -3181,7 +3181,7 @@ textarea.form-control-lg {
     margin-top: -.25rem;
     -webkit-appearance: none;
     appearance: none;
-    background-color: #2074BA;
+    background-color: #1C3345;
     border: 0;
     border-radius: 1rem;
     -webkit-transition: background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
@@ -3216,7 +3216,7 @@ textarea.form-control-lg {
     height: 1rem;
     -moz-appearance: none;
     appearance: none;
-    background-color: #2074BA;
+    background-color: #1C3345;
     border: 0;
     border-radius: 1rem;
     -moz-transition: background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
@@ -3868,8 +3868,8 @@ fieldset:disabled .btn {
 
 .btn-primary {
     --vz-btn-color: #fff;
-    --vz-btn-bg: #2074BA;
-    --vz-btn-border-color: #2074BA;
+    --vz-btn-bg: #1C3345;
+    --vz-btn-border-color: #1C3345;
     --vz-btn-hover-color: #fff;
     --vz-btn-hover-bg: #145a95;
     --vz-btn-hover-border-color: #33416e;
@@ -3879,14 +3879,14 @@ fieldset:disabled .btn {
     --vz-btn-active-border-color: #303d67;
     --vz-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
     --vz-btn-disabled-color: #fff;
-    --vz-btn-disabled-bg: #2074BA;
-    --vz-btn-disabled-border-color: #2074BA
+    --vz-btn-disabled-bg: #1C3345;
+    --vz-btn-disabled-border-color: #1C3345
 }
 
 .btn-secondary {
     --vz-btn-color: #fff;
-    --vz-btn-bg: #2074ba;
-    --vz-btn-border-color: #2074ba;
+    --vz-btn-bg: #1C3345;
+    --vz-btn-border-color: #1C3345;
     --vz-btn-hover-color: #fff;
     --vz-btn-hover-bg: #145a95;
     --vz-btn-hover-border-color: #2a5fc1;
@@ -3896,8 +3896,8 @@ fieldset:disabled .btn {
     --vz-btn-active-border-color: #2859b5;
     --vz-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
     --vz-btn-disabled-color: #fff;
-    --vz-btn-disabled-bg: #2074ba;
-    --vz-btn-disabled-border-color: #2074ba
+    --vz-btn-disabled-bg: #1C3345;
+    --vz-btn-disabled-border-color: #1C3345
 }
 
 .btn-success {
@@ -4003,36 +4003,36 @@ fieldset:disabled .btn {
 }
 
 .btn-outline-primary {
-    --vz-btn-color: #2074BA;
-    --vz-btn-border-color: #2074BA;
+    --vz-btn-color: #1C3345;
+    --vz-btn-border-color: #1C3345;
     --vz-btn-hover-color: #fff;
-    --vz-btn-hover-bg: #2074BA;
-    --vz-btn-hover-border-color: #2074BA;
-    --vz-btn-focus-shadow-rgb: 64, 81, 137;
+    --vz-btn-hover-bg: #1C3345;
+    --vz-btn-hover-border-color: #1C3345;
+    --vz-btn-focus-shadow-rgb: 28, 51, 69;
     --vz-btn-active-color: #fff;
-    --vz-btn-active-bg: #2074BA;
-    --vz-btn-active-border-color: #2074BA;
+    --vz-btn-active-bg: #1C3345;
+    --vz-btn-active-border-color: #1C3345;
     --vz-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-    --vz-btn-disabled-color: #2074BA;
+    --vz-btn-disabled-color: #1C3345;
     --vz-btn-disabled-bg: transparent;
-    --vz-btn-disabled-border-color: #2074BA;
+    --vz-btn-disabled-border-color: #1C3345;
     --vz-gradient: none
 }
 
 .btn-outline-secondary {
-    --vz-btn-color: #2074ba;
-    --vz-btn-border-color: #2074ba;
+    --vz-btn-color: #1C3345;
+    --vz-btn-border-color: #1C3345;
     --vz-btn-hover-color: #fff;
-    --vz-btn-hover-bg: #2074ba;
-    --vz-btn-hover-border-color: #2074ba;
-    --vz-btn-focus-shadow-rgb: 53, 119, 241;
+    --vz-btn-hover-bg: #1C3345;
+    --vz-btn-hover-border-color: #1C3345;
+    --vz-btn-focus-shadow-rgb: 158, 208, 197;
     --vz-btn-active-color: #fff;
-    --vz-btn-active-bg: #2074ba;
-    --vz-btn-active-border-color: #2074ba;
+    --vz-btn-active-bg: #1C3345;
+    --vz-btn-active-border-color: #1C3345;
     --vz-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-    --vz-btn-disabled-color: #2074ba;
+    --vz-btn-disabled-color: #1C3345;
     --vz-btn-disabled-bg: transparent;
-    --vz-btn-disabled-border-color: #2074ba;
+    --vz-btn-disabled-border-color: #1C3345;
     --vz-gradient: none
 }
 
@@ -4737,7 +4737,7 @@ fieldset:disabled .btn {
 .nav-pills {
     --vz-nav-pills-border-radius: var(--vz-border-radius);
     --vz-nav-pills-link-active-color: #fff;
-    --vz-nav-pills-link-active-bg: #2074BA
+    --vz-nav-pills-link-active-bg: #1C3345
 }
 
 .nav-pills .nav-link {
@@ -5865,8 +5865,8 @@ fieldset:disabled .btn {
     --vz-pagination-focus-bg: var(--vz-tertiary-bg);
     --vz-pagination-focus-box-shadow: 0 0 1 0.25rem rgba(var(--vz-primary-rgb), 0.25);
     --vz-pagination-active-color: #fff;
-    --vz-pagination-active-bg: #2074BA;
-    --vz-pagination-active-border-color: #2074BA;
+    --vz-pagination-active-bg: #1C3345;
+    --vz-pagination-active-border-color: #1C3345;
     --vz-pagination-disabled-color: var(--vz-secondary-color);
     --vz-pagination-disabled-bg: var(--vz-secondary-bg);
     --vz-pagination-disabled-border-color: var(--vz-border-color);
@@ -6182,8 +6182,8 @@ fieldset:disabled .btn {
     --vz-list-group-disabled-color: var(--vz-secondary-color);
     --vz-list-group-disabled-bg: var(--vz-secondary-bg);
     --vz-list-group-active-color: #fff;
-    --vz-list-group-active-bg: #2074BA;
-    --vz-list-group-active-border-color: #2074BA;
+    --vz-list-group-active-bg: #1C3345;
+    --vz-list-group-active-border-color: #1C3345;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;

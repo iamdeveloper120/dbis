@@ -111,7 +111,7 @@ table.fixed-columns-table.dataTable tbody td {
 }
 
 .select2-container .select2-selection--multiple .select2-selection__choice {
-    background-color: #2074BA;
+    background-color: #1C3345;
     border: none;
     color: #fff;
     border-radius: 3px;
@@ -146,15 +146,15 @@ table.fixed-columns-table.dataTable tbody td {
 }
 
 .btn-soft-custom-primary {
-    --vz-btn-color: #2074BA;
-    --vz-btn-bg: rgba(64, 81, 137, 0.1);
+    --vz-btn-color: #1C3345;
+    --vz-btn-bg: rgba(28, 51, 69, 0.1);
     --vz-btn-border-color: transparent;
-    --vz-btn-hover-color: #2074BA;
-    --vz-btn-hover-bg: rgba(64, 81, 137, 0.1);
+    --vz-btn-hover-color: #1C3345;
+    --vz-btn-hover-bg: rgba(28, 51, 69, 0.1);
     --vz-btn-hover-border-color: transparent;
-    --vz-btn-focus-shadow-rgb: 64, 81, 137;
+    --vz-btn-focus-shadow-rgb: 28, 51, 69;
     --vz-btn-active-color: var(--vz-btn-hover-color);
-    --vz-btn-active-bg: rgba(64, 81, 137, 0.1);
+    --vz-btn-active-bg: rgba(28, 51, 69, 0.1);
     --vz-btn-active-border-color: transparent;
 }
 
@@ -170,7 +170,7 @@ table.fixed-columns-table.dataTable tbody td {
 }
 
 .dt-new-row {
-    color: #2074BA;  
+    color: #1C3345;  
 }
 .dt-updated-row {
     background-color: #ffff99; /* Light yellow */
@@ -185,7 +185,7 @@ table.fixed-columns-table.dataTable tbody td {
     top: 0;
     bottom: 0;
     opacity: .9;
-    background: #2074BA;
+    background: #1C3345;
 }
 /* Flatpickr year spinner arrows: always visible and white */
 .flatpickr-current-month .numInputWrapper span {
@@ -198,4 +198,48 @@ table.fixed-columns-table.dataTable tbody td {
 
 .flatpickr-current-month .numInputWrapper span.arrowDown:after {
     border-top-color: #fff !important;
+}
+
+/* ============================================================
+   DBIS brand theme override (loaded last, wins the cascade)
+   Primary  / brand : Dark Navy  #1C3345  rgb(28, 51, 69)
+   Secondary / accent: Sage Green #9ED0C5  rgb(158, 208, 197)
+   ============================================================ */
+:root,
+[data-bs-theme=light],
+[data-bs-theme=dark] {
+    --vz-primary: #1C3345;
+    --vz-primary-rgb: 28, 51, 69;
+    --vz-primary-text-emphasis: #16293a;
+    --vz-primary-bg-subtle: #e8eaec;
+    --vz-primary-border-subtle: #a4adb5;
+
+    --vz-secondary: #9ED0C5;
+    --vz-secondary-rgb: 158, 208, 197;
+    --vz-secondary-text-emphasis: #3e5a53;
+    --vz-secondary-bg-subtle: #ecf6f3;
+    --vz-secondary-border-subtle: #cee7e2;
+
+    --vz-link-color: #1C3345;
+    --vz-link-color-rgb: 28, 51, 69;
+    --vz-link-hover-color: #16293a;
+    --vz-link-hover-color-rgb: 22, 41, 58;
+}
+
+/* Sage is light: use dark navy text on secondary buttons/badges for contrast */
+.btn-secondary {
+    --vz-btn-color: #1C3345;
+    --vz-btn-hover-color: #1C3345;
+    --vz-btn-active-color: #1C3345;
+    --vz-btn-disabled-color: #1C3345;
+}
+.btn-outline-secondary {
+    --vz-btn-color: #3e5a53;
+    --vz-btn-hover-color: #1C3345;
+    --vz-btn-active-color: #1C3345;
+}
+.badge.bg-secondary,
+.badge.text-bg-secondary,
+.text-bg-secondary {
+    color: #1C3345 !important;
 }
