@@ -12,14 +12,23 @@
 
     <?= $this->include('layout/head-css') ?>
     <style>
-        .auth-one-bg .bg-overlay {
-            background: -webkit-gradient(linear, left top, right top, from(#364574), to(#405189));
-            background: linear-gradient(to right, #878a99, #434343);
-            opacity: 0.9;
+        /* Brand colors: Dark Navy #1C3345 / Sage Green #9ED0C5 */
+
+        /* Outer page background: appealing navy -> teal -> sage diagonal */
+        .auth-bg-cover {
+            background: linear-gradient(135deg, #1C3345 0%, #24485a 40%, #4f8a85 75%, #9ED0C5 100%);
         }
 
-        .auth-bg-cover {
-            background: linear-gradient(-45deg, #0d6efd 50%, #198754);
+        /* Keep the full-page overlay out of the way so the gradient stays clean */
+        .auth-page-wrapper > .bg-overlay {
+            background: transparent;
+            opacity: 1;
+        }
+
+        /* Left logo panel: deep navy gradient so the white logo stays prominent */
+        .auth-one-bg .bg-overlay {
+            background: linear-gradient(160deg, #1C3345 0%, #1a3a48 55%, #245c54 100%);
+            opacity: 0.97;
         }
     </style>
 
