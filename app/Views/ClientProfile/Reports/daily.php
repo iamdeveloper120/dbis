@@ -15,6 +15,8 @@
         align-items: center;
         justify-content: center;
     }
+
+    .flatpickr-calendar.open { z-index: 9999 !important; }
 </style>
 <?= $this->endSection() ?>
 
@@ -78,6 +80,7 @@
 <script>
     $(document).ready(function() {
         var canGenerateReport = <?= auth()->user()->can('client-profile.reports.daily.generate') ? 'true' : 'false' ?>;
+        var canRegenerate = <?= auth()->user()->can('client-profile.reports.daily.regenerate') ? 'true' : 'false' ?>;
         var canDeleteVersion = <?= auth()->user()->can('client-profile.reports.daily.delete-version') ? 'true' : 'false' ?>;
         var canDeleteAll = <?= auth()->user()->can('client-profile.reports.daily.delete-all') ? 'true' : 'false' ?>;
         var encodedClientId = '<?= esc($encodedClientId ?? '', 'js') ?>';
@@ -138,6 +141,8 @@
                         window.location.href = draftUrl;
                     }
                 });
+            } else if (result.statusText === 'NoSession') {
+                showAlert('No Sessions', result.message || 'No session exists for the selected date.', 'warning');
             } else {
                 showAlert(result.statusText, result.message || 'Cannot generate report.', 'error');
             }
@@ -164,6 +169,66 @@
                     hidePageLoader();
                     showAlert(jqXHR.status, 'Request failed.', 'error');
                 });
+        }
+
+        function doRegenerate(versionId, versionLabel) {
+            Swal.fire({
+                title: 'Regenerate Draft',
+                text: 'This will create a new draft from ' + (versionLabel || 'this version') + '. Continue?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Regenerate',
+                cancelButtonText: 'Cancel',
+                customClass: { confirmButton: 'btn btn-warning w-xs me-2 mt-2', cancelButton: 'btn btn-secondary w-xs mt-2' },
+                buttonsStyling: false
+            }).then(function(res) {
+                if (!res.isConfirmed) return;
+                postWithLoader(baseUrl + '/version/' + versionId + '/regenerate', {})
+                    .done(function(result) {
+                        if (result.status === 'success') {
+                            var draftUrl = result.data && result.data.draft_url ? result.data.draft_url : '';
+                            if (draftUrl) {
+                                window.location.href = draftUrl;
+                            } else {
+                                showAlert('Regenerate', 'New draft created successfully.', 'success');
+                                table.ajax.reload();
+                                $('#versions_modal').modal('hide');
+                            }
+                        } else {
+                            showAlert(result.statusText, result.message || 'Regeneration failed.', 'error');
+                        }
+                    })
+                    .fail(function(jqXHR) {
+                        showAlert(jqXHR.status, 'Request failed.', 'error');
+                    });
+            });
+        }
+
+        function doDeleteVersion(versionId, versionLabel) {
+            Swal.fire({
+                title: 'Delete Version',
+                text: 'Delete ' + (versionLabel || 'this version') + '? This cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Delete',
+                cancelButtonText: 'Cancel',
+                customClass: { confirmButton: 'btn btn-danger w-xs me-2 mt-2', cancelButton: 'btn btn-secondary w-xs mt-2' },
+                buttonsStyling: false
+            }).then(function(res) {
+                if (!res.isConfirmed) return;
+                postWithLoader(baseUrl + '/version/' + versionId + '/delete', {})
+                    .done(function(result) {
+                        if (result.status === 'success') {
+                            table.ajax.reload();
+                            $('#versions_modal').modal('hide');
+                        } else {
+                            showAlert(result.statusText, result.message || 'Delete failed.', 'error');
+                        }
+                    })
+                    .fail(function(jqXHR) {
+                        showAlert(jqXHR.status, 'Request failed.', 'error');
+                    });
+            });
         }
 
         function startGenerate(prefillDate) {
@@ -300,6 +365,14 @@
                             menu += '<li><a class="dropdown-item" href="' + baseUrl + '/version/' + row.latest_version_id + '/pdf"><i class="ri-download-2-line align-bottom me-2 text-muted"></i>Download Latest Version</a></li>';
                         }
 
+                        if (status === 'FINAL' && row.latest_version_id && canRegenerate) {
+                            menu += '<li><a class="dropdown-item regenerate-version" href="#" data-version-id="' + row.latest_version_id + '" data-version-label="v' + row.latest_version_no + '"><i class="ri-restart-line align-bottom me-2 text-muted"></i>Regenerate Draft</a></li>';
+                        }
+
+                        if (canDeleteVersion && row.latest_version_id) {
+                            menu += '<li><a class="dropdown-item delete-latest-version" href="#" data-version-id="' + row.latest_version_id + '" data-version-label="v' + row.latest_version_no + '"><i class="ri-delete-bin-line align-bottom me-2 text-warning"></i>Delete Latest Version</a></li>';
+                        }
+
                         if (canDeleteAll && row.report_id) {
                             menu += '<li><hr class="dropdown-divider"></li>';
                             menu += '<li><a class="dropdown-item text-danger delete-all" href="#" data-report-id="' + row.report_id + '" data-date-display="' + (row.report_date_display || row.report_date || '') + '"><i class="ri-delete-bin-line align-bottom me-2"></i>Delete All Versions</a></li>';
@@ -323,9 +396,11 @@
                     }
 
                     var rows = response.data || [];
+                    var maxVersionNo = rows.reduce(function(m, r) { return Math.max(m, r.version_no || 0); }, 0);
                     var html = '';
                     rows.forEach(function(row) {
                         var status = String(row.status || 'FINAL').toUpperCase();
+                        var isLatest = (row.version_no === maxVersionNo);
                         var statusBadge = status === 'FINAL'
                             ? '<span class="badge bg-success-subtle text-success">Final</span>'
                             : '<span class="badge bg-warning-subtle text-warning">Draft</span>';
@@ -337,6 +412,12 @@
                             actionBtn = '<a class="btn btn-sm btn-light" href="' + baseUrl + '/version/' + row.version_id + '/pdf">Download PDF</a>';
                         } else {
                             actionBtn = '<button class="btn btn-sm btn-light" disabled>No PDF</button>';
+                        }
+                        if (status === 'FINAL' && canRegenerate) {
+                            actionBtn += ' <a class="btn btn-sm btn-warning regenerate-version" href="#" data-version-id="' + row.version_id + '" data-version-label="v' + row.version_no + '">Regenerate</a>';
+                        }
+                        if (canDeleteVersion && isLatest) {
+                            actionBtn += ' <a class="btn btn-sm btn-danger delete-latest-version" href="#" data-version-id="' + row.version_id + '" data-version-label="v' + row.version_no + '">Delete</a>';
                         }
 
                         html += '<tr>' +
@@ -363,6 +444,16 @@
         $('#daily_report_datatable').on('click', '.versions', function(e) {
             e.preventDefault();
             loadVersions($(this).data('report-id'), $(this).data('date-display') || '');
+        });
+
+        $('#daily_report_datatable, #versions_table').on('click', '.regenerate-version', function(e) {
+            e.preventDefault();
+            doRegenerate($(this).data('version-id'), $(this).data('version-label'));
+        });
+
+        $('#daily_report_datatable, #versions_table').on('click', '.delete-latest-version', function(e) {
+            e.preventDefault();
+            doDeleteVersion($(this).data('version-id'), $(this).data('version-label'));
         });
 
         $('#daily_report_datatable').on('click', '.delete-all', function(e) {
